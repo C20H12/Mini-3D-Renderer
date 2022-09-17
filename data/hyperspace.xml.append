@@ -1,0 +1,11 @@
+<scripts>
+  <script>data/SimpleGraphicsV1.1.1.min.lua</script>
+  <script>data/3d.lua</script>
+</scripts>
+
+<events>
+  <variable name="var_timer_shouldStart" op="set" val="0"></variable>
+  <variable name="var_timer_shouldPause" op="set" val="0"></variable>
+  <variable name="var_timer_shouldReset" op="set" val="0"></variable>
+  <variable name="var_timer_enabled" op="set" val="0"></variable>
+</events>
