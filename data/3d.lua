@@ -62,9 +62,9 @@ local Object = {
   end,
 
   get_projection = function(self, x, y, z)
-    local actual_x = x * self.dist_to_screen / z
-    local actual_y = y * self.dist_to_screen / z
-    local scale = self.dist_to_screen / z
+    local actual_x = x * Camra.dist_to_screen / z
+    local actual_y = y * Camra.dist_to_screen / z
+    local scale = Camra.dist_to_screen / z
 
     if actual_x ~= actual_x then
       actual_x = 0
@@ -103,11 +103,11 @@ local Object = {
   end,
 
   rotate_matrix = function(self)
-    local x = self.obj_x - self.camra_x
-    local y = self.obj_y - self.camra_y
-    local z = self.obj_z - self.camra_z
-    local dir_y = 0 - self.camra_dir_y
-    local dir_x = 0 - self.camra_dir_x
+    local x = self.obj_x - Camra.camra_x
+    local y = self.obj_y - Camra.camra_y
+    local z = self.obj_z - Camra.camra_z
+    local dir_y = 0 - Camra.camra_dir_y
+    local dir_x = 0 - Camra.camra_dir_x
     local rotated_x = z * math.sin(dir_y) + x * math.cos(dir_y)
     local rotated_z = z * math.cos(dir_y) - x * math.sin(dir_y) * math.cos(dir_x) - y * math.sin(dir_x)
     local rotated_y = rotated_z * math.sin(dir_x) + y * math.cos(dir_x)
@@ -127,7 +127,7 @@ local Object = {
   end,
 
   compute_distance = function(self)
-    return math.sqrt((self.obj_x - self.camra_x) ^ 2 + (self.obj_y - self.camra_y) ^ 2 + (self.obj_z - self.camra_z) ^ 2)
+    return math.sqrt((self.obj_x - Camra.camra_x) ^ 2 + (self.obj_y - Camra.camra_y) ^ 2 + (self.obj_z - Camra.camra_z) ^ 2)
   end,
 
   sort_objects = function(array)
@@ -153,10 +153,12 @@ end
 
 local function draw_horizon()
   if should_draw then
-    SimpleSprite:new('horizon')
+    local x_pos = 0
+    local y_pos = math.tan(0 - Camra.camra_dir_x) * Camra.dist_to_screen
+    SimpleSprite:new('bg')
                 :show({
-                        Xalign = 0,
-                        Yalign = -50, 
+                        Xalign = x_pos,
+                        Yalign = y_pos - 150,
                       })
   end
 end
@@ -175,9 +177,8 @@ local objects = {
 }
 
 script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, function()
-  draw_bg()
-  
   draw_horizon()
+  
 
   -- for _, obj in ipairs(objects) do
   --   obj:display()
@@ -228,61 +229,41 @@ script.on_game_event("CANVAS_END", false, function()
 end)
 
 script.on_game_event("STICK1_UP", false, function() -- forward
-  for _, obj in ipairs(objects) do
-    obj:camra_move_forward(5)
-  end
+  Camra:camra_move_forward(5)
 end)
 
 script.on_game_event("STICK1_DOWN", false, function() -- backward
-  for _, obj in ipairs(objects) do
-    obj:camra_move_forward(-5)
-  end
+  Camra:camra_move_forward(-5)
 end)
 
 script.on_game_event("STICK1_LEFT", false, function() -- left strafe
-  for _, obj in ipairs(objects) do
-    obj:camra_move_horizontal(-5)
-  end
+  Camra:camra_move_horizontal(-5)
 end)
 
 script.on_game_event("STICK1_RIGHT", false, function() -- right strafe
-  for _, obj in ipairs(objects) do
-    obj:camra_move_horizontal(5)
-  end
+  Camra:camra_move_horizontal(5)
 end)
 
 script.on_game_event("STICK2_UP", false, function() -- up rotate
-  for _, obj in ipairs(objects) do
-    obj:camra_rotate_x(0.1)
-  end
+  Camra:camra_rotate_x(0.1)
 end)
 
 script.on_game_event("STICK2_DOWN", false, function() -- down rotate
-  for _, obj in ipairs(objects) do
-    obj:camra_rotate_x(-0.1)
-  end
+  Camra:camra_rotate_x(-0.1)
 end)
 
 script.on_game_event("STICK2_LEFT", false, function() -- left rotate
-  for _, obj in ipairs(objects) do
-    obj:camra_rotate_y(-0.1)
-  end
+  Camra:camra_rotate_y(-0.1)
 end)
 
 script.on_game_event("STICK2_RIGHT", false, function() -- right rotate
-  for _, obj in ipairs(objects) do
-    obj:camra_rotate_y(0.1)
-  end
+  Camra:camra_rotate_y(0.1)
 end)
 
 script.on_game_event("STICK3_UP", false, function() -- up move
-  for _, obj in ipairs(objects) do
-    obj:camra_move_vertical(-5)
-  end
+  Camra:camra_move_vertical(-5)
 end)
 
 script.on_game_event("STICK3_DOWN", false, function() -- down move
-  for _, obj in ipairs(objects) do
-    obj:camra_move_vertical(5)
-  end
+  Camra:camra_move_vertical(5)
 end)
