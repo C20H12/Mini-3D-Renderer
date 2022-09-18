@@ -10,7 +10,7 @@ local Object = {
   obj_x = 0,
   obj_y = 0,
   obj_z = 0,
-  
+
   dist_to_screen = 300,
 
   camra_dir = 0,
@@ -74,11 +74,6 @@ local Object = {
     return rotated_x, rotated_z
   end,
 
-  set_camra_rotation = function(self, value)
-    self.camra_x = self.camra_x + value * math.sin(self.camra_dir)
-    self.camra_z = self.camra_z + value * math.cos(self.camra_dir)
-  end,
-
   compute_distance = function(self)
     return math.sqrt((self.obj_x - self.camra_x) ^ 2 + (self.obj_y - self.camra_y) ^ 2 + (self.obj_z - self.camra_z) ^ 2)
   end,
@@ -87,7 +82,28 @@ local Object = {
     table.sort(array, function(a, b)
       return a:compute_distance() > b:compute_distance()
     end)
-  end
+  end,
+
+  set_camra_rotation = function(self, value)
+    self.camra_x = self.camra_x + value * math.sin(self.camra_dir)
+    self.camra_z = self.camra_z + value * math.cos(self.camra_dir)
+  end,
+
+  set_camra_pan_h = function(self, value)
+    self.camra_x = self.camra_x + value * math.cos(self.camra_dir)
+    self.camra_z = self.camra_z - value * math.sin(self.camra_dir)
+  end,
+
+  set_camra_pan_v = function(self, value)
+    self.camra_y = self.camra_y + value
+  end,
+
+  set_camra_dir = function(self, value)
+    if value > 360 then
+      value = value - 360
+    end
+    self.camra_dir = self.camra_dir + value
+  end,
 }
 
 
@@ -179,24 +195,36 @@ end)
 
 script.on_game_event("STICK1_LEFT", false, function()
   for _, obj in ipairs(objects) do
-    obj.camra_dir = obj.camra_dir - 0.1
+    obj:set_camra_dir(-0.1)
   end
 end)
 
 script.on_game_event("STICK1_RIGHT", false, function()
   for _, obj in ipairs(objects) do
-    obj.camra_dir = obj.camra_dir + 0.1
+    obj:set_camra_dir(0.1)
   end
 end)
 
 script.on_game_event("STICK2_LEFT", false, function()
   for _, obj in ipairs(objects) do
-    obj.camra_x = obj.camra_x + 10
+    obj:set_camra_pan_h(5)
   end
 end)
 
 script.on_game_event("STICK2_RIGHT", false, function()
   for _, obj in ipairs(objects) do
-    obj.camra_x = obj.camra_x - 10
+    obj:set_camra_pan_h(-5)
+  end
+end)
+
+script.on_game_event("STICK2_UP", false, function()
+  for _, obj in ipairs(objects) do
+    obj:set_camra_pan_v(-5)
+  end
+end)
+
+script.on_game_event("STICK2_DOWN", false, function()
+  for _, obj in ipairs(objects) do
+    obj:set_camra_pan_v(5)
   end
 end)
