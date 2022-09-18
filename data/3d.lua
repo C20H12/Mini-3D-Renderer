@@ -3,17 +3,51 @@ local SimpleSprite = mods.libs.SG.SimpleSprite
 
 local should_draw = false
 
-local Object = {
+local Camra = {
   camra_x = 0,
   camra_y = 0,
   camra_z = 0,
-  obj_x = 0,
-  obj_y = 0,
-  obj_z = 0,
+
+  camra_dir_y = 0,
+  camra_dir_x = 0,
 
   dist_to_screen = 300,
 
-  camra_dir = 0,
+  camra_move_forward = function(self, value)
+    self.camra_x = self.camra_x + value * math.sin(self.camra_dir_y)
+    self.camra_z = self.camra_z + value * math.cos(self.camra_dir_y)
+  end,
+
+  camra_move_horizontal = function(self, value)
+    self.camra_x = self.camra_x + value * math.cos(self.camra_dir_y)
+    self.camra_z = self.camra_z - value * math.sin(self.camra_dir_y)
+  end,
+
+  camra_move_vertical = function(self, value)
+    self.camra_y = self.camra_y + value
+  end,
+
+  camra_rotate_y = function(self, value)
+    if value > 360 then
+      value = value - 360
+    end
+    self.camra_dir_y = self.camra_dir_y + value
+  end,
+  
+  camra_rotate_x = function(self, value)
+    if value > 360 then
+      value = value - 360
+    end
+    self.camra_dir_x = self.camra_dir_x + value
+  end,
+}
+
+
+local Object = {
+  
+  obj_x = 0,
+  obj_y = 0,
+  obj_z = 0,
 
   shared_x = 0,
   shared_y = 0,
@@ -50,8 +84,8 @@ local Object = {
 
   display = function(self)
     if should_draw then
-      local rotated_x, rotated_z = self:rotate_matrix(self.obj_x - self.camra_x, self.obj_z - self.camra_z, 0 - self.camra_dir)
-      local x, y, scale = self:get_projection(rotated_x, self.obj_y - self.camra_y, rotated_z)
+      local rotated_x, rotated_y, rotated_z = self:rotate_matrix()
+      local x, y, scale = self:get_projection(rotated_x, rotated_y, rotated_z)
 
       if rotated_z > 25 and (x < 680 and x > -680) and (y < 360 and y > -360) then
         self.shared_is_visible = true
@@ -68,10 +102,28 @@ local Object = {
     end
   end,
 
-  rotate_matrix = function(self, x, z, dir)
+  rotate_matrix = function(self)
+    local x = self.obj_x - self.camra_x
+    local y = self.obj_y - self.camra_y
+    local z = self.obj_z - self.camra_z
+    local dir_y = 0 - self.camra_dir_y
+    local dir_x = 0 - self.camra_dir_x
+    local rotated_x = z * math.sin(dir_y) + x * math.cos(dir_y)
+    local rotated_z = z * math.cos(dir_y) - x * math.sin(dir_y) * math.cos(dir_x) - y * math.sin(dir_x)
+    local rotated_y = rotated_z * math.sin(dir_x) + y * math.cos(dir_x)
+    return rotated_x, rotated_y, rotated_z
+  end,
+
+  rotate_matrix_y = function(self, x, z, dir)
     local rotated_x = z * math.sin(dir) + x * math.cos(dir)
     local rotated_z = z * math.cos(dir) - x * math.sin(dir)
     return rotated_x, rotated_z
+  end,
+
+  rotate_matrix_x = function(self, y, z, dir)
+    local rotated_y = z * math.sin(dir) + y * math.cos(dir)
+    local rotated_z = z * math.cos(dir) - y * math.sin(dir)
+    return rotated_y, rotated_z
   end,
 
   compute_distance = function(self)
@@ -82,27 +134,6 @@ local Object = {
     table.sort(array, function(a, b)
       return a:compute_distance() > b:compute_distance()
     end)
-  end,
-
-  set_camra_rotation = function(self, value)
-    self.camra_x = self.camra_x + value * math.sin(self.camra_dir)
-    self.camra_z = self.camra_z + value * math.cos(self.camra_dir)
-  end,
-
-  set_camra_pan_h = function(self, value)
-    self.camra_x = self.camra_x + value * math.cos(self.camra_dir)
-    self.camra_z = self.camra_z - value * math.sin(self.camra_dir)
-  end,
-
-  set_camra_pan_v = function(self, value)
-    self.camra_y = self.camra_y + value
-  end,
-
-  set_camra_dir = function(self, value)
-    if value > 360 then
-      value = value - 360
-    end
-    self.camra_dir = self.camra_dir + value
   end,
 }
 
@@ -117,6 +148,16 @@ local function draw_bg()
                       Yalign = -50, 
                       color = SimpleShape.colorFactory("ffffffff")
                      })
+  end
+end
+
+local function draw_horizon()
+  if should_draw then
+    SimpleSprite:new('horizon')
+                :show({
+                        Xalign = 0,
+                        Yalign = -50, 
+                      })
   end
 end
 
@@ -136,6 +177,8 @@ local objects = {
 script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, function()
   draw_bg()
   
+  draw_horizon()
+
   -- for _, obj in ipairs(objects) do
   --   obj:display()
   -- end
@@ -180,51 +223,66 @@ script.on_game_event("CANVAS_INIT", false, function()
   should_draw = true
 end)
 
+script.on_game_event("CANVAS_END", false, function()
+  should_draw = false
+end)
 
-script.on_game_event("STICK1_UP", false, function()
+script.on_game_event("STICK1_UP", false, function() -- forward
   for _, obj in ipairs(objects) do
-    obj:set_camra_rotation(5)
+    obj:camra_move_forward(5)
   end
 end)
 
-script.on_game_event("STICK1_DOWN", false, function()
+script.on_game_event("STICK1_DOWN", false, function() -- backward
   for _, obj in ipairs(objects) do
-    obj:set_camra_rotation(-5)
+    obj:camra_move_forward(-5)
   end
 end)
 
-script.on_game_event("STICK1_LEFT", false, function()
+script.on_game_event("STICK1_LEFT", false, function() -- left strafe
   for _, obj in ipairs(objects) do
-    obj:set_camra_dir(-0.1)
+    obj:camra_move_horizontal(-5)
   end
 end)
 
-script.on_game_event("STICK1_RIGHT", false, function()
+script.on_game_event("STICK1_RIGHT", false, function() -- right strafe
   for _, obj in ipairs(objects) do
-    obj:set_camra_dir(0.1)
+    obj:camra_move_horizontal(5)
   end
 end)
 
-script.on_game_event("STICK2_LEFT", false, function()
+script.on_game_event("STICK2_UP", false, function() -- up rotate
   for _, obj in ipairs(objects) do
-    obj:set_camra_pan_h(5)
+    obj:camra_rotate_x(0.1)
   end
 end)
 
-script.on_game_event("STICK2_RIGHT", false, function()
+script.on_game_event("STICK2_DOWN", false, function() -- down rotate
   for _, obj in ipairs(objects) do
-    obj:set_camra_pan_h(-5)
+    obj:camra_rotate_x(-0.1)
   end
 end)
 
-script.on_game_event("STICK2_UP", false, function()
+script.on_game_event("STICK2_LEFT", false, function() -- left rotate
   for _, obj in ipairs(objects) do
-    obj:set_camra_pan_v(-5)
+    obj:camra_rotate_y(-0.1)
   end
 end)
 
-script.on_game_event("STICK2_DOWN", false, function()
+script.on_game_event("STICK2_RIGHT", false, function() -- right rotate
   for _, obj in ipairs(objects) do
-    obj:set_camra_pan_v(5)
+    obj:camra_rotate_y(0.1)
+  end
+end)
+
+script.on_game_event("STICK3_UP", false, function() -- up move
+  for _, obj in ipairs(objects) do
+    obj:camra_move_vertical(-5)
+  end
+end)
+
+script.on_game_event("STICK3_DOWN", false, function() -- down move
+  for _, obj in ipairs(objects) do
+    obj:camra_move_vertical(5)
   end
 end)
