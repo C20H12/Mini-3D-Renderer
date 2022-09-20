@@ -1,5 +1,5 @@
 <scripts>
-  <script>data/SimpleGraphicsV1.1.1.min.lua</script>
+  <script>data/SimpleGraphicsV1.1.2.min.lua</script>
   <script>data/3d.lua</script>
 </scripts>
 
