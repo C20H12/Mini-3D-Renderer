@@ -1,7 +1,29 @@
 local SimpleShape = mods.libs.SG.SimpleShape
 local SimpleSprite = mods.libs.SG.SimpleSprite
+local math_sin, math_cos, math_tan, sqrt, HUGE, PI = math.sin, math.cos, math.tan, math.sqrt, math.huge, math.pi
+local sort = table.sort
 
 local should_draw = false
+
+local CustomMath = {
+  sin = function(x)
+    return math_sin(x * PI / 180)
+  end,
+  cos = function(x)
+    return math_cos(x * PI / 180)
+  end,
+  tan = function(x)
+    return math_tan(x * PI / 180)
+  end,
+  toDeg = function(x)
+    return x * 180 / PI
+  end,
+  toRad = function(x)
+    return x * PI / 180
+  end,
+}
+
+local sin, cos, tan = CustomMath.sin, CustomMath.cos, CustomMath.tan
 
 local Camra = {
   camra_x = 0,
@@ -14,13 +36,13 @@ local Camra = {
   dist_to_screen = 300,
 
   camra_move_forward = function(self, value)
-    self.camra_x = self.camra_x + value * math.sin(self.camra_dir_y)
-    self.camra_z = self.camra_z + value * math.cos(self.camra_dir_y)
+    self.camra_x = self.camra_x + value * sin(self.camra_dir_y)
+    self.camra_z = self.camra_z + value * cos(self.camra_dir_y)
   end,
 
   camra_move_horizontal = function(self, value)
-    self.camra_x = self.camra_x + value * math.cos(self.camra_dir_y)
-    self.camra_z = self.camra_z - value * math.sin(self.camra_dir_y)
+    self.camra_x = self.camra_x + value * cos(self.camra_dir_y)
+    self.camra_z = self.camra_z - value * sin(self.camra_dir_y)
   end,
 
   camra_move_vertical = function(self, value)
@@ -28,17 +50,15 @@ local Camra = {
   end,
 
   camra_rotate_y = function(self, value)
-    if value > 360 then
-      value = value - 360
-    end
     self.camra_dir_y = self.camra_dir_y + value
   end,
   
   camra_rotate_x = function(self, value)
-    if value > 360 then
-      value = value - 360
-    end
     self.camra_dir_x = self.camra_dir_x + value
+  end,
+
+  camra_rotate_z = function(self, value)
+    self.camra_dir_z = self.camra_dir_z + value
   end,
 }
 
@@ -72,7 +92,7 @@ local Object = {
     if actual_y ~= actual_y then
       actual_y = 0
     end
-    if scale == math.huge then
+    if scale == HUGE then
       scale = 1
     end
 
@@ -108,30 +128,18 @@ local Object = {
     local z = self.obj_z - Camra.camra_z
     local dir_y = 0 - Camra.camra_dir_y
     local dir_x = 0 - Camra.camra_dir_x
-    local rotated_x = z * math.sin(dir_y) + x * math.cos(dir_y)
-    local rotated_z = z * math.cos(dir_y) - x * math.sin(dir_y) * math.cos(dir_x) - y * math.sin(dir_x)
-    local rotated_y = rotated_z * math.sin(dir_x) + y * math.cos(dir_x)
+    local rotated_x = z * sin(dir_y) + x * cos(dir_y)
+    local rotated_z = z * cos(dir_y) - x * sin(dir_y) * cos(dir_x) - y * sin(dir_x)
+    local rotated_y = rotated_z * sin(dir_x) + y * cos(dir_x)
     return rotated_x, rotated_y, rotated_z
   end,
 
-  rotate_matrix_y = function(self, x, z, dir)
-    local rotated_x = z * math.sin(dir) + x * math.cos(dir)
-    local rotated_z = z * math.cos(dir) - x * math.sin(dir)
-    return rotated_x, rotated_z
-  end,
-
-  rotate_matrix_x = function(self, y, z, dir)
-    local rotated_y = z * math.sin(dir) + y * math.cos(dir)
-    local rotated_z = z * math.cos(dir) - y * math.sin(dir)
-    return rotated_y, rotated_z
-  end,
-
   compute_distance = function(self)
-    return math.sqrt((self.obj_x - Camra.camra_x) ^ 2 + (self.obj_y - Camra.camra_y) ^ 2 + (self.obj_z - Camra.camra_z) ^ 2)
+    return sqrt((self.obj_x - Camra.camra_x) ^ 2 + (self.obj_y - Camra.camra_y) ^ 2 + (self.obj_z - Camra.camra_z) ^ 2)
   end,
 
   sort_objects = function(array)
-    table.sort(array, function(a, b)
+    sort(array, function(a, b)
       return a:compute_distance() > b:compute_distance()
     end)
   end,
@@ -154,11 +162,11 @@ end
 local function draw_horizon()
   if should_draw then
     local x_pos = 0
-    local y_pos = math.tan(0 - Camra.camra_dir_x) * Camra.dist_to_screen
+    local y_pos = tan(0 - Camra.camra_dir_x) * Camra.dist_to_screen
     SimpleSprite:new('bg')
                 :show({
                         Xalign = x_pos,
-                        Yalign = y_pos - 150,
+                        Yalign = y_pos,
                       })
   end
 end
@@ -176,7 +184,7 @@ local objects = {
   Object:new(-100, -100, 100),
 }
 
-script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, function()
+script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, function()
   draw_horizon()
   
 
@@ -245,25 +253,35 @@ script.on_game_event("STICK1_RIGHT", false, function() -- right strafe
 end)
 
 script.on_game_event("STICK2_UP", false, function() -- up rotate
-  Camra:camra_rotate_x(0.1)
+  if Camra.camra_dir_x > 45 then return end
+  Camra:camra_rotate_x(5)
 end)
 
 script.on_game_event("STICK2_DOWN", false, function() -- down rotate
-  Camra:camra_rotate_x(-0.1)
+  if Camra.camra_dir_x < -45 then return end
+  Camra:camra_rotate_x(-5)
 end)
 
 script.on_game_event("STICK2_LEFT", false, function() -- left rotate
-  Camra:camra_rotate_y(-0.1)
+  Camra:camra_rotate_y(-5)
 end)
 
 script.on_game_event("STICK2_RIGHT", false, function() -- right rotate
-  Camra:camra_rotate_y(0.1)
+  Camra:camra_rotate_y(5)
 end)
 
 script.on_game_event("STICK3_UP", false, function() -- up move
-  Camra:camra_move_vertical(-5)
+  Camra:camra_move_vertical(5)
 end)
 
 script.on_game_event("STICK3_DOWN", false, function() -- down move
-  Camra:camra_move_vertical(5)
+  Camra:camra_move_vertical(-5)
+end)
+
+script.on_game_event("STICK3_LEFT", false, function() -- left move
+  Camra:camra_rotate_z(-5)
+end)
+
+script.on_game_event("STICK3_RIGHT", false, function() -- right move
+  Camra:camra_rotate_z(5)
 end)
