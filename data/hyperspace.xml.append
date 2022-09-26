@@ -1,6 +1,9 @@
 <scripts>
   <script>data/SimpleGraphicsV1.1.2.min.lua</script>
-  <script>data/3d.lua</script>
+  <!-- <script>data/3d.lua</script> -->
+  <!-- <script>data/map.lua</script> -->
+  <script>data/raycast.lua</script>
+  <!-- <script>data/raycast_1.lua</script> -->
 </scripts>
 
 <events>
