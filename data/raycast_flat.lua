@@ -47,7 +47,8 @@ local function Color(r, g, b, a)
 end
 
 local function draw_bg()
-  Graphics.CSurface.GL_DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color(0,0,0,1)) -- bg
+  Graphics.CSurface.GL_DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2, Color(0,181,226,1)) -- bg sky
+  Graphics.CSurface.GL_DrawRect(0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, Color(185,122,87,1)) -- bg floor
 end
 
 local function dim_color(color, percent)
