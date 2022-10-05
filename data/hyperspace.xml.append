@@ -2,13 +2,7 @@
   <script>data/SimpleGraphicsV1.1.2.min.lua</script>
   <!-- <script>data/3d.lua</script> -->
   <!-- <script>data/map.lua</script> -->
-  <script>data/raycast.lua</script>
-  <!-- <script>data/raycast_1.lua</script> -->
+  <!-- <script>data/raycast_flat.lua</script> -->
+  <script>data/3d_new.lua</script>
 </scripts>
 
-<events>
-  <variable name="var_timer_shouldStart" op="set" val="0"></variable>
-  <variable name="var_timer_shouldPause" op="set" val="0"></variable>
-  <variable name="var_timer_shouldReset" op="set" val="0"></variable>
-  <variable name="var_timer_enabled" op="set" val="0"></variable>
-</events>

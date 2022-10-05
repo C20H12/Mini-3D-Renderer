@@ -1,4 +1,4 @@
-<mod:findName name="START_BEACON_REAL">
+<mod:findName name="START_BEACON">
   <mod-append:eventButton>
     <event load="CANVAS_INIT"/>
     <text border="3">start</text>
@@ -45,7 +45,7 @@
     <customLocation x="550" y="125"/>
     <tooltip>strafe right</tooltip>
   </eventButton>
-
+<!-- 
   <eventButton>
     <event load="STICK2_UP"/>
     <image border='0'>player2_up</image>
@@ -100,7 +100,7 @@
     <image border='0'>player3_right</image>
     <customLocation x="950" y="125"/>
     <tooltip>wobble right</tooltip>
-  </eventButton>
+  </eventButton> -->
 
   
   <choice>
@@ -115,9 +115,9 @@
 <event name="STICK1_DOWN"></event>
 <event name="STICK1_LEFT"></event>
 <event name="STICK1_RIGHT"></event>
-<event name="STICK2_UP"></event>
+<!-- <event name="STICK2_UP"></event>
 <event name="STICK2_DOWN"></event>
 <event name="STICK2_LEFT"></event>
 <event name="STICK2_RIGHT"></event>
 <event name="STICK3_UP"></event>
-<event name="STICK3_DOWN"></event>
+<event name="STICK3_DOWN"></event> -->
