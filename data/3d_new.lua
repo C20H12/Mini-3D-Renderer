@@ -1,13 +1,13 @@
 local sin, cos, tan, PI, sqrt, max = math.sin, math.cos, math.tan, math.pi, math.sqrt, math.max
 local insert, unpack, sort = table.insert, table.unpack, table.sort
-local GL_DrawLine, GL_DrawTriangle = Graphics.CSurface.GL_DrawLine, Graphics.CSurface.GL_DrawTriangle
+local GL_DrawLine, GL_DrawTriangle, GL_DrawRect = Graphics.CSurface.GL_DrawLine, Graphics.CSurface.GL_DrawTriangle, Graphics.CSurface.GL_DrawRect
 local Point, FPS = Hyperspace.Point, Hyperspace.FPS
 
 local SCREEN_WIDTH = 1280
 local SCREEN_HEIGHT = 720
 
 
-
+---@class Vector3d
 local Vector3d = {}
 
 Vector3d.x = 0
@@ -60,90 +60,92 @@ end
 
 
 
-local Triangle = {
-  points = {},
-  color = {0, 0, 0},
-  new = function(self, vec1, vec2, vec3)
-    local o = {points = {vec1, vec2, vec3}}
+---@class Triangle
+local Triangle = {}
 
-    for _, vec in ipairs(o.points) do
-      if getmetatable(vec) ~= Vector3d then
-        return log("Error: Triangle.new: vec is not a Vector3d")
+Triangle.points = {}
+Triangle.color = {0, 0, 0}
+
+Triangle.new = function(self, vec1, vec2, vec3)
+  local o = {points = {vec1, vec2, vec3}}
+
+  for _, vec in ipairs(o.points) do
+    if getmetatable(vec) ~= Vector3d then
+      return log("Error: Triangle.new: vec is not a Vector3d")
+    end
+  end
+
+  self.__index = self
+  return setmetatable(o, self)
+end
+
+
+
+---@class Mesh
+local Mesh = {}
+
+Mesh.triangles = {}
+
+Mesh.new = function(self, ...)
+  local o = {triangles = {...}}
+
+  for _, tri in ipairs(o.triangles) do
+    if getmetatable(tri) ~= Triangle then
+      return log("Error: Mesh.new: tri is not a Triangle")
+    end
+  end
+
+  self.__index = self
+  return setmetatable(o, self)
+end
+
+Mesh.LoadFromFile = function(self, fileName)
+  local file = io.open(fileName, "r")
+  if not file then 
+    log("Error: Mesh.LoadFromFile: file not found")
+    return false 
+  end
+
+  -- cache of vertices
+  local vertices = {}
+
+  local o = {triangles = {}}
+
+  for line in file:lines() do
+
+    if line:sub(1, 1) == "v" then
+      local verts = {}
+      for vert in string.gmatch(line, "%S+") do
+        insert(verts, tonumber(vert) or 'v')
       end
+
+      local vector = Vector3d:new(verts[2], verts[3], verts[4])
+      insert(vertices, vector)
     end
 
-    self.__index = self
-    return setmetatable(o, self)
-  end,
-}
-
-local Mesh = {
-  triangles = {},
-  LoadFromFile = function(self, fileName)
-    local file = io.open(fileName, "r")
-    if not file then 
-      log("Error: Mesh.LoadFromFile: file not found")
-      return false 
-    end
-
-    -- cache of vertices
-    local vertices = {}
-
-    local o = {triangles = {}}
-
-    for line in file:lines() do
-      local string = line
-      local junkChar
-      
-      if line:sub(1, 1) == "v" then
-        local verts = {}
-        for vert in string.gmatch(string, "%S+") do
-          insert(verts, vert)
+    if line:sub(1, 1) == "f" then
+      local points = {}
+      for point in string.gmatch(line, "%S+") do
+        if string.find(point, '/') then
+          insert(points, tonumber(string.gmatch(point, "%d+")()))
+        else
+          insert(points, tonumber(point) or 'f')
         end
-
-        for i = 2, #verts do
-          verts[i] = tonumber(verts[i])
-        end
-
-        junkChar = verts[1]
-        local vector = Vector3d:new(verts[2], verts[3], verts[4])
-        insert(vertices, vector)
       end
 
-      if line:sub(1, 1) == "f" then
-        local points = {}
-        for point in string.gmatch(string, "%S+") do
-          insert(points, point)
-        end
-
-        for i = 2, #points do
-          points[i] = tonumber(points[i])
-        end
-
-        junkChar = points[1]
-        local triangle = Triangle:new(vertices[points[2]], vertices[points[3]], vertices[points[4]])
-        insert(o.triangles, triangle)
-      end
+      local triangle = Triangle:new(vertices[points[2]], vertices[points[3]], vertices[points[4]])
+      insert(o.triangles, triangle)
     end
+  end
 
-    file:close()
-    self.__index = self
-    return setmetatable(o, self)
-  end,
-  new = function(self, ...)
-    local o = {triangles = {...}}
+  file:close()
+  self.__index = self
+  return setmetatable(o, self)
+end
 
-    for _, tri in ipairs(o.triangles) do
-      if getmetatable(tri) ~= Triangle then
-        return log("Error: Mesh.new: tri is not a Triangle")
-      end
-    end
 
-    self.__index = self
-    return setmetatable(o, self)
-  end,
-}
 
+---@class Matrix_4x4
 local Matrix_4x4 = {}
 
 Matrix_4x4.matrix = {}
@@ -158,6 +160,30 @@ Matrix_4x4.new = function(self, ...)
   } }
   self.__index = self
   return setmetatable(o, self)
+end
+
+Matrix_4x4.__mul = function(self, matOrVec)
+  if matOrVec.x and matOrVec.y and matOrVec.z then
+    local vec = matOrVec
+    return Vector3d:new(
+      vec.x * self.matrix[1][1] + vec.y * self.matrix[2][1] + vec.z * self.matrix[3][1] + vec.w * self.matrix[4][1],
+      vec.x * self.matrix[1][2] + vec.y * self.matrix[2][2] + vec.z * self.matrix[3][2] + vec.w * self.matrix[4][2],
+      vec.x * self.matrix[1][3] + vec.y * self.matrix[2][3] + vec.z * self.matrix[3][3] + vec.w * self.matrix[4][3],
+      vec.x * self.matrix[1][4] + vec.y * self.matrix[2][4] + vec.z * self.matrix[3][4] + vec.w * self.matrix[4][4]
+    )
+  end
+
+  local mat = matOrVec
+  local tempMat = self.CreateIdentity()
+  for i=1, 4 do
+    for j=1, 4 do
+      tempMat.matrix[j][i] = self.matrix[j][1] * mat.matrix[1][i] + 
+                             self.matrix[j][2] * mat.matrix[2][i] + 
+                             self.matrix[j][3] * mat.matrix[3][i] + 
+                             self.matrix[j][4] * mat.matrix[4][i];
+    end
+  end
+  return tempMat
 end
 
 Matrix_4x4.CreateIdentity = function()
@@ -215,31 +241,42 @@ Matrix_4x4.CreateProjection = function(fov, ar, nearPlane, farPlane)
   )
 end
 
-Matrix_4x4.__mul = function(self, matOrVec)
-  if getmetatable(matOrVec) == Vector3d then
-    local vec = matOrVec
-    return Vector3d:new(
-      vec.x * self.matrix[1][1] + vec.y * self.matrix[2][1] + vec.z * self.matrix[3][1] + vec.w * self.matrix[4][1],
-      vec.x * self.matrix[1][2] + vec.y * self.matrix[2][2] + vec.z * self.matrix[3][2] + vec.w * self.matrix[4][2],
-      vec.x * self.matrix[1][3] + vec.y * self.matrix[2][3] + vec.z * self.matrix[3][3] + vec.w * self.matrix[4][3],
-      vec.x * self.matrix[1][4] + vec.y * self.matrix[2][4] + vec.z * self.matrix[3][4] + vec.w * self.matrix[4][4]
-    )
-  end
+Matrix_4x4.PointAt = function(pos, target, up)
+  -- calculate new forward direction
+  local vNewForward = (target - pos):Normalize()
 
-  local mat = matOrVec
-  local tempMat = self:CreateIdentity()
-  for i=1, 4 do
-    for j=1, 4 do
-      tempMat.matrix[j][i] = self.matrix[j][1] * mat.matrix[1][i] + 
-                             self.matrix[j][2] * mat.matrix[2][i] + 
-                             self.matrix[j][3] * mat.matrix[3][i] + 
-                             self.matrix[j][4] * mat.matrix[4][i];
-    end
-  end
-  return tempMat
+  -- calculate new up direction
+  local a = vNewForward * Vector3d.GetDotProduct(up, vNewForward)
+  local vNewUp = (up - a):Normalize()
+
+  -- calculate new right direction
+  local vNewRight = Vector3d.GetCrossProduct(vNewUp, vNewForward)
+
+  -- construct Dimensioning and Translation matrix
+  local matrix = Matrix_4x4:new(
+    vNewRight.x,      vNewRight.y,     vNewRight.z,     0,
+    vNewUp.x,         vNewUp.y,        vNewUp.z,        0,
+    vNewForward.x,    vNewForward.y,   vNewForward.z,   0,
+    pos.x,            pos.y,           pos.z,           1
+  )
+  
+  return matrix
 end
 
+Matrix_4x4.QuickInverse = function(m)
+  local matrix = Matrix_4x4:new(
+    m.matrix[1][1], m.matrix[1][2], m.matrix[1][3], 0,
+    m.matrix[2][1], m.matrix[2][2], m.matrix[2][3], 0,
+    m.matrix[3][1], m.matrix[3][2], m.matrix[3][3], 0,
+    0,              0,              0,              1
+  )
+  
+  matrix.matrix[4][1] = -( m.matrix[4][1] * matrix.matrix[1][1] + m.matrix[4][2] * matrix.matrix[2][1] + m.matrix[4][3] * matrix.matrix[3][1] )
+  matrix.matrix[4][2] = -( m.matrix[4][1] * matrix.matrix[1][2] + m.matrix[4][2] * matrix.matrix[2][2] + m.matrix[4][3] * matrix.matrix[3][2] )
+  matrix.matrix[4][3] = -( m.matrix[4][1] * matrix.matrix[1][3] + m.matrix[4][2] * matrix.matrix[2][3] + m.matrix[4][3] * matrix.matrix[3][3] )
 
+  return matrix
+end
 
 
 
@@ -260,16 +297,16 @@ end
 
 local function TriangleFill(point1, point2, point3, r, g, b)
   GL_DrawTriangle(
-    Point(point1.x, point1.y),
-    Point(point2.x, point2.y),
-    Point(point3.x, point3.y),
+    Point(SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y),
+    Point(SCREEN_WIDTH - point2.x, SCREEN_HEIGHT - point2.y),
+    Point(SCREEN_WIDTH - point3.x, SCREEN_HEIGHT - point3.y),
     Color(r, g, b, 1)
   )
 end
 
 
 
-local object = Mesh:LoadFromFile('teapot.obj')
+local object = Mesh:LoadFromFile('axis.obj')
 
 
 
@@ -281,16 +318,37 @@ local matMeshProjection = Matrix_4x4.CreateProjection(90, SCREEN_HEIGHT / SCREEN
 local should_draw = false
 local elapsed_time = 0
 
-script.on_internal_event(Defines.InternalEvents.ON_TICK, function()
-  elapsed_time = elapsed_time + (FPS.SpeedFactor / 16)
+-- script.on_internal_event(Defines.InternalEvents.ON_TICK, function()
+--   elapsed_time = elapsed_time + (FPS.SpeedFactor / 16)
+-- end)
+
+
+-- camera vector
+local vCamera = Vector3d:new(0, 0, 0)
+
+script.on_game_event("STICK1_UP", false, function() -- forward
+  vCamera.y = vCamera.y + 0.1
 end)
 
-script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, function()
+script.on_game_event("STICK1_DOWN", false, function() -- backward
+  vCamera.y = vCamera.y - 0.1
+end)
+
+script.on_game_event("STICK1_LEFT", false, function() -- left
+  vCamera.x = vCamera.x + 0.1
+end)
+
+script.on_game_event("STICK1_RIGHT", false, function() -- right
+  vCamera.x = vCamera.x - 0.1
+end)
+
+
+script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, function()
   if not should_draw then return end
 
-  Graphics.CSurface.GL_DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color(0, 0, 0, 1))
+  GL_DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color(0, 0, 0, 1))
 
-  local theta = elapsed_time
+  local theta = 0
 
   -- rotation matrices
   local matRotationZ = Matrix_4x4.CreateRotationZ(theta * 0.5)
@@ -305,14 +363,22 @@ script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, functi
   matWorld = matWorld * matTranslation
 
 
-  -- camera vector
-  local vCamra = Vector3d:new(0, 0, 0)
+  local vLookDir = Vector3d:new(0, 0, 1)
+  local vUp = Vector3d:new(0, 1, 0)
+  local vTarget = vCamera + vLookDir
 
+  local matCamera = Matrix_4x4.PointAt(vCamera, vTarget, vUp)
+
+  local matView = Matrix_4x4.QuickInverse(matCamera)
+
+
+  -- store triangle for rastering later
   local trianglesToDraw = {}
 
 
   -- draw triangles
-  for _, triangle in ipairs(object.triangles) do
+  for i = 1, #object.triangles do
+    local triangle = object.triangles[i]
     
     local triangleTransformed = Triangle:new(
       matWorld * triangle.points[1],
@@ -331,10 +397,10 @@ script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, functi
 
 
     -- get the ray from the camera to the triangle
-    local vCamraRay = triangleTransformed.points[1] - vCamra
+    local vCameraRay = triangleTransformed.points[1] - vCamera
 
     -- if ray i aligned with the normal, then the triangle is visible
-    if Vector3d.GetDotProduct(normal, vCamraRay) < 0 then
+    if Vector3d.GetDotProduct(normal, vCameraRay) < 0 then
 
       -- lighting source
       local vLightDirection = Vector3d:new(0, 1, -1):Normalize()
@@ -344,11 +410,19 @@ script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, functi
       local dotProduct = max(0.1, Vector3d.GetDotProduct(vLightDirection, normal))
 
 
+      -- convert world space --> view space
+      local triangleViewed = Triangle:new(
+        matView * triangleTransformed.points[1],
+        matView * triangleTransformed.points[2],
+        matView * triangleTransformed.points[3]
+      )
+
+
       -- project the 3D --> 2D
       local triangleProjected = Triangle:new(
-        matMeshProjection * triangleTransformed.points[1],
-        matMeshProjection * triangleTransformed.points[2],
-        matMeshProjection * triangleTransformed.points[3]
+        matMeshProjection * triangleViewed.points[1],
+        matMeshProjection * triangleViewed.points[2],
+        matMeshProjection * triangleViewed.points[3]
       )
 
 
@@ -373,24 +447,26 @@ script.on_render_event(Defines.RenderEvents.GUI_CONTAINER, function()end, functi
       
 
       -- store the triangle for sorting and drawing
-      triangleProjected.color = {dotProduct * 255, dotProduct * 255, dotProduct * 255}
-      insert(trianglesToDraw, triangleProjected)
-    end
-
-    -- sort the triangles from back to front
-    sort(trianglesToDraw, function(t1, t2)
-      local zAvg1 = (t1.points[1].z + t1.points[2].z + t1.points[3].z) / 3
-      local zAvg2 = (t2.points[1].z + t2.points[2].z + t2.points[3].z) / 3
-      return zAvg1 > zAvg2
-    end)
-
-    -- draw triangles in order of distance from the camra, from the queue
-    for _, triangle in ipairs(trianglesToDraw) do
-      local color = triangle.color
-      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
-      -- TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
+      triangleProjected.color = {dotProduct ^ 2 * 255, dotProduct ^ 2 * 255, dotProduct ^ 2 * 255}
+      trianglesToDraw[#trianglesToDraw + 1] = triangleProjected
     end
   end
+
+  -- sort the triangles from back to front
+  sort(trianglesToDraw, function(t1, t2)
+    local zAvg1 = (t1.points[1].z + t1.points[2].z + t1.points[3].z) / 3
+    local zAvg2 = (t2.points[1].z + t2.points[2].z + t2.points[3].z) / 3
+    return zAvg1 > zAvg2
+  end)
+
+  -- draw triangles in order of distance from the camra, from the queue
+  for i = 1, #trianglesToDraw do
+    local triangle = trianglesToDraw[i]
+    local color = triangle.color
+    TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
+    -- TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
+  end
+  
 end)
 
 
