@@ -1,8 +1,14 @@
 <scripts>
-  <script>data/SimpleGraphicsV1.1.2.min.lua</script>
+  <!-- <script>data/SimpleGraphicsV1.1.2.min.lua</script> -->
   <!-- <script>data/3d.lua</script> -->
   <!-- <script>data/map.lua</script> -->
   <!-- <script>data/raycast_flat.lua</script> -->
-  <script>data/3d_new.lua</script>
+  <!-- <script>data/3d_new.lua</script> -->
+  <script>data/3D/util.lua</script>
+  <script>data/3D/Vector3d.lua</script>
+  <script>data/3D/Triangle.lua</script>
+  <script>data/3D/Mesh.lua</script>
+  <script>data/3D/Matrix_4x4.lua</script>
+  <script>data/3D/Main.lua</script>
 </scripts>
 

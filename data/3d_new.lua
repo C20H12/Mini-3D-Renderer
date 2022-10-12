@@ -7,7 +7,7 @@ local SCREEN_WIDTH = 1280
 local SCREEN_HEIGHT = 720
 
 
----@class Vector3d
+-- Vector3d
 local Vector3d = {}
 
 Vector3d.x = 0
@@ -58,9 +58,20 @@ Vector3d.Normalize = function(self)
   return self
 end
 
+Vector3d.IntersectPlane = function(planeP, planeN, lineStart, lineEnd)
+  planeN = Vector3d:new(planeN.x, planeN.y, planeN.z):Normalize()
+  local planeD = -Vector3d.GetDotProduct(planeN, planeP)
+  local ad = Vector3d.GetDotProduct(lineStart, planeN)
+  local bd = Vector3d.GetDotProduct(lineEnd, planeN)
+  local t = (-planeD - ad) / (bd - ad)
+  local lineStartToEnd = lineEnd - lineStart
+  local lineToIntersect = lineStartToEnd * t
+  return lineStart + lineToIntersect
+end
 
 
----@class Triangle
+
+-- Triangle
 local Triangle = {}
 
 Triangle.points = {}
@@ -79,9 +90,110 @@ Triangle.new = function(self, vec1, vec2, vec3)
   return setmetatable(o, self)
 end
 
+Triangle.ClipAgainstPlane = function(planeP, planeN, inTri, outTri1, outTri2)
+  -- Make sure plane normal is indeed normal
+  planeN = Vector3d:new(planeN.x, planeN.y, planeN.z):Normalize()
+
+  -- get the signed distance from point to plane
+  local dist = function(p)
+    local n = Vector3d:new(p.x, p.y, p.z):Normalize()
+    return (planeN.x * p.x + planeN.y * p.y + planeN.z * p.z - Vector3d.GetDotProduct(planeN, planeP))
+  end
+
+  -- Create two temporary storage arrays to classify points either side of plane
+  -- If distance sign is positive, point lies on "inside" of plane
+  local insidePoints = {}
+  local outsidePoints = {}
+  local insidePointsCount = 0
+  local outsidePointsCount = 0
+
+  -- Get signed distance of each point in triangle to plane
+  local dist1 = dist(inTri.points[1])
+  local dist2 = dist(inTri.points[2])
+  local dist3 = dist(inTri.points[3])
+
+  if dist1 >= 0 then
+    insidePoints[insidePointsCount + 1] = inTri.points[1]
+    insidePointsCount = insidePointsCount + 1
+  else
+    outsidePoints[outsidePointsCount + 1] = inTri.points[1]
+    outsidePointsCount = outsidePointsCount + 1
+  end
+
+  if dist2 >= 0 then
+    insidePoints[insidePointsCount + 1] = inTri.points[2]
+    insidePointsCount = insidePointsCount + 1
+  else
+    outsidePoints[outsidePointsCount + 1] = inTri.points[2]
+    outsidePointsCount = outsidePointsCount + 1
+  end
+
+  if dist3 >= 0 then
+    insidePoints[insidePointsCount + 1] = inTri.points[3]
+    insidePointsCount = insidePointsCount + 1
+  else
+    outsidePoints[outsidePointsCount + 1] = inTri.points[3]
+    outsidePointsCount = outsidePointsCount + 1
+  end
+
+  -- classify the triangle points, break the input triangle into smaller output triangles if required
+  if insidePointsCount == 0 then
+    -- All points lie on the outside of plane
+    return 0
+  end
+
+  if insidePointsCount == 3 then
+    -- All points lie on the inside of plane
+    outTri1 = inTri
+    return 1
+  end
+
+  if insidePointsCount == 1 and outsidePointsCount == 2 then
+    -- Triangle should be clipped. As two points lie outside the plane
+    -- the triangle simply becomes a smaller triangle
+
+    -- Copy appearance info to new triangle
+    outTri1.color = inTri.color
+
+    -- keep inside point
+    outTri1.points[1] = insidePoints[1]
+
+    -- the two new points are at the location where the original
+    -- sides of the triangle (lines) intersect with the plane
+    outTri1.points[2] = Vector3d.IntersectPlane(planeP, planeN, insidePoints[1], outsidePoints[1])
+    outTri1.points[3] = Vector3d.IntersectPlane(planeP, planeN, insidePoints[1], outsidePoints[2])
+    
+    return 1
+  end
+
+  if insidePointsCount == 2 and outsidePointsCount == 1 then
+    -- Triangle should be clipped. As two points lie inside the plane
+    -- the triangle simply becomes a "quad"
+
+    -- Copy appearance info to new triangles
+    outTri1.color = inTri.color
+    outTri2.color = inTri.color
+
+    -- the first triangle consists of inside points and a new point 
+    -- determined by the location where one side of the triangle intersects with the plane
+    outTri1.points[1] = insidePoints[1]
+    outTri1.points[2] = insidePoints[2]
+    outTri1.points[3] = Vector3d.IntersectPlane(planeP, planeN, insidePoints[1], outsidePoints[1])
+
+    -- the second triangle is composed of one of he inside points, a new point
+    -- determined by the intersection of the other side of the triangle and the plane,
+    -- and the newly created point above
+    outTri2.points[1] = insidePoints[2]
+    outTri2.points[2] = outTri1.points[3]
+    outTri2.points[3] = Vector3d.IntersectPlane(planeP, planeN, insidePoints[2], outsidePoints[1])
+
+    return 2
+  end
+end
 
 
----@class Mesh
+
+-- Mesh
 local Mesh = {}
 
 Mesh.triangles = {}
@@ -145,7 +257,7 @@ end
 
 
 
----@class Matrix_4x4
+-- Matrix_4x4
 local Matrix_4x4 = {}
 
 Matrix_4x4.matrix = {}
@@ -265,9 +377,9 @@ end
 
 Matrix_4x4.QuickInverse = function(m)
   local matrix = Matrix_4x4:new(
-    m.matrix[1][1], m.matrix[1][2], m.matrix[1][3], 0,
-    m.matrix[2][1], m.matrix[2][2], m.matrix[2][3], 0,
-    m.matrix[3][1], m.matrix[3][2], m.matrix[3][3], 0,
+    m.matrix[1][1], m.matrix[2][1], m.matrix[3][1], 0,
+    m.matrix[1][2], m.matrix[2][2], m.matrix[3][2], 0,
+    m.matrix[1][3], m.matrix[2][3], m.matrix[3][3], 0,
     0,              0,              0,              1
   )
   
@@ -325,23 +437,43 @@ local elapsed_time = 0
 
 -- camera vector
 local vCamera = Vector3d:new(0, 0, 0)
+local vLookDir = Vector3d:new(0, 0, 1)
+local yaw = 0
 
 script.on_game_event("STICK1_UP", false, function() -- forward
-  vCamera.y = vCamera.y + 0.1
+  vCamera.y = vCamera.y + 1
 end)
 
 script.on_game_event("STICK1_DOWN", false, function() -- backward
-  vCamera.y = vCamera.y - 0.1
+  vCamera.y = vCamera.y - 1
 end)
 
 script.on_game_event("STICK1_LEFT", false, function() -- left
-  vCamera.x = vCamera.x + 0.1
+  vCamera.x = vCamera.x + 1
 end)
 
 script.on_game_event("STICK1_RIGHT", false, function() -- right
-  vCamera.x = vCamera.x - 0.1
+  vCamera.x = vCamera.x - 1
 end)
 
+
+local vForward = vLookDir * 8
+
+script.on_game_event("STICK2_UP", false, function() -- foward
+  vCamera = vCamera + vForward
+end)
+
+script.on_game_event("STICK2_DOWN", false, function() -- backward
+  vCamera = vCamera - vForward
+end)
+
+script.on_game_event("STICK2_LEFT", false, function() -- turn left
+  yaw = yaw - 1
+end)
+
+script.on_game_event("STICK2_RIGHT", false, function() -- turn right
+  yaw = yaw + 1
+end)
 
 script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, function()
   if not should_draw then return end
@@ -363,9 +495,12 @@ script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, functio
   matWorld = matWorld * matTranslation
 
 
-  local vLookDir = Vector3d:new(0, 0, 1)
+  -- camera movements 
   local vUp = Vector3d:new(0, 1, 0)
-  local vTarget = vCamera + vLookDir
+  local vTarget = Vector3d:new(0, 0, 1)
+  local matCameraRot = Matrix_4x4.CreateRotationY(yaw)
+  vLookDir = matCameraRot * vTarget
+  vTarget = vCamera + vLookDir
 
   local matCamera = Matrix_4x4.PointAt(vCamera, vTarget, vUp)
 

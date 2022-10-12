@@ -45,7 +45,7 @@
     <customLocation x="550" y="125"/>
     <tooltip>strafe right</tooltip>
   </eventButton>
-<!-- 
+
   <eventButton>
     <event load="STICK2_UP"/>
     <image border='0'>player2_up</image>
@@ -74,7 +74,7 @@
     <tooltip>look right</tooltip>
   </eventButton>
  
-  <eventButton>
+  <!-- <eventButton>
     <event load="STICK3_UP"/>
     <image border='0'>player3_up</image>
     <customLocation x="900" y="100"/>
@@ -109,15 +109,18 @@
   </choice>
 </event>
 
-<event name="CANVAS_END" />
+<event name="CANVAS_END">
+</event>
 
 <event name="STICK1_UP"></event>
 <event name="STICK1_DOWN"></event>
 <event name="STICK1_LEFT"></event>
 <event name="STICK1_RIGHT"></event>
-<!-- <event name="STICK2_UP"></event>
+<event name="STICK2_UP"></event>
 <event name="STICK2_DOWN"></event>
 <event name="STICK2_LEFT"></event>
 <event name="STICK2_RIGHT"></event>
-<event name="STICK3_UP"></event>
-<event name="STICK3_DOWN"></event> -->
+<!-- <event name="STICK3_UP"></event>
+<event name="STICK3_DOWN"></event>
+<event name="STICK3_LEFT"></event>
+<event name="STICK3_RIGHT"></event> -->
