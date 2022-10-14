@@ -16,9 +16,21 @@ function Color(r, g, b, a)
 end
 
 function TriangleOutline(point1, point2, point3, r, g, b)
-  GL_DrawLine(point1.x, point1.y, point2.x, point2.y, 2, Color(r, g, b, 1))
-  GL_DrawLine(point2.x, point2.y, point3.x, point3.y, 2, Color(r, g, b, 1))
-  GL_DrawLine(point3.x, point3.y, point1.x, point1.y, 2, Color(r, g, b, 1))
+  GL_DrawLine(
+    SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y, 
+    SCREEN_WIDTH - point2.x, SCREEN_HEIGHT - point2.y, 2, 
+    Color(r, g, b, 1)
+  )
+  GL_DrawLine(
+    SCREEN_WIDTH - point2.x, SCREEN_HEIGHT - point2.y, 
+    SCREEN_WIDTH - point3.x, SCREEN_HEIGHT - point3.y, 2, 
+    Color(r, g, b, 1)
+  )
+  GL_DrawLine(
+    SCREEN_WIDTH - point3.x, SCREEN_HEIGHT - point3.y, 
+    SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y, 2, 
+    Color(r, g, b, 1)
+  )
 end
 
 function TriangleFill(point1, point2, point3, r, g, b)
@@ -29,3 +41,8 @@ function TriangleFill(point1, point2, point3, r, g, b)
     Color(r, g, b, 1)
   )
 end
+
+function GetColor(dp)
+  return {dp ^ 2 * 255, dp ^ 2 * 255, dp ^ 2 * 255}
+end
+

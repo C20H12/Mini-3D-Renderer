@@ -1,5 +1,5 @@
 local max = math.max
-local sort = table.sort
+local sort, remove = table.sort, table.remove
 local GL_DrawRect = Graphics.CSurface.GL_DrawRect
 local Point, FPS = Hyperspace.Point, Hyperspace.FPS
 
@@ -31,19 +31,19 @@ local vLookDir = Vector3d:new(0, 0, 1)
 local yaw = 0
 
 script.on_game_event("STICK1_UP", false, function() -- forward
-  vCamera.y = vCamera.y + 1
+  vCamera.y = vCamera.y + 0.5
 end)
 
 script.on_game_event("STICK1_DOWN", false, function() -- backward
-  vCamera.y = vCamera.y - 1
+  vCamera.y = vCamera.y - 0.5
 end)
 
 script.on_game_event("STICK1_LEFT", false, function() -- left
-  vCamera.x = vCamera.x + 1
+  vCamera.x = vCamera.x + 0.5
 end)
 
 script.on_game_event("STICK1_RIGHT", false, function() -- right
-  vCamera.x = vCamera.x - 1
+  vCamera.x = vCamera.x - 0.5
 end)
 
 
@@ -135,45 +135,63 @@ script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, functio
       local dotProduct = max(0.1, Vector3d.GetDotProduct(vLightDirection, normal))
 
 
+      -- choose color
+      triangleTransformed.color = GetColor(dotProduct)
+
+
       -- convert world space --> view space
       local triangleViewed = Triangle:new(
         matView * triangleTransformed.points[1],
         matView * triangleTransformed.points[2],
         matView * triangleTransformed.points[3]
       )
+      triangleViewed.color = triangleTransformed.color
 
 
-      -- project the 3D --> 2D
-      local triangleProjected = Triangle:new(
-        matMeshProjection * triangleViewed.points[1],
-        matMeshProjection * triangleViewed.points[2],
-        matMeshProjection * triangleViewed.points[3]
+      -- clip viewed triangle against near plane, this could form two 
+      -- additional triangles
+      local clippedTrianglesCount = 0
+      local triangleClipped = {}
+      clippedTrianglesCount, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
+        Vector3d:new(0, 0, 0.1), Vector3d:new(0, 0, 1), triangleViewed
       )
 
 
-      -- scale into view, manual normalising
-      triangleProjected.points[1] = triangleProjected.points[1] / triangleProjected.points[1].w
-      triangleProjected.points[2] = triangleProjected.points[2] / triangleProjected.points[2].w
-      triangleProjected.points[3] = triangleProjected.points[3] / triangleProjected.points[3].w
-      
+      -- project as many clipped triangles as we have
+      for j = 1, clippedTrianglesCount do
+        
+        -- project the 3D --> 2D
+        local triangleProjected = Triangle:new(
+          matMeshProjection * triangleClipped[j].points[1],
+          matMeshProjection * triangleClipped[j].points[2],
+          matMeshProjection * triangleClipped[j].points[3]
+        )
+        triangleProjected.color = triangleClipped[j].color
 
-      -- scale into view
-      local vOffsetView = Vector3d:new(1, 1, 0)
-      triangleProjected.points[1] = triangleProjected.points[1] + vOffsetView
-      triangleProjected.points[2] = triangleProjected.points[2] + vOffsetView
-      triangleProjected.points[3] = triangleProjected.points[3] + vOffsetView
 
-      triangleProjected.points[1].x = triangleProjected.points[1].x * (0.5 * SCREEN_WIDTH)
-      triangleProjected.points[1].y = triangleProjected.points[1].y * (0.5 * SCREEN_HEIGHT)
-      triangleProjected.points[2].x = triangleProjected.points[2].x * (0.5 * SCREEN_WIDTH)
-      triangleProjected.points[2].y = triangleProjected.points[2].y * (0.5 * SCREEN_HEIGHT)
-      triangleProjected.points[3].x = triangleProjected.points[3].x * (0.5 * SCREEN_WIDTH)
-      triangleProjected.points[3].y = triangleProjected.points[3].y * (0.5 * SCREEN_HEIGHT)
-      
+        -- scale into view, manual normalising
+        triangleProjected.points[1] = triangleProjected.points[1] / triangleProjected.points[1].w
+        triangleProjected.points[2] = triangleProjected.points[2] / triangleProjected.points[2].w
+        triangleProjected.points[3] = triangleProjected.points[3] / triangleProjected.points[3].w
+        
 
-      -- store the triangle for sorting and drawing
-      triangleProjected.color = {dotProduct ^ 2 * 255, dotProduct ^ 2 * 255, dotProduct ^ 2 * 255}
-      trianglesToDraw[#trianglesToDraw + 1] = triangleProjected
+        -- scale into view
+        local vOffsetView = Vector3d:new(1, 1, 0)
+        triangleProjected.points[1] = triangleProjected.points[1] + vOffsetView
+        triangleProjected.points[2] = triangleProjected.points[2] + vOffsetView
+        triangleProjected.points[3] = triangleProjected.points[3] + vOffsetView
+
+        triangleProjected.points[1].x = triangleProjected.points[1].x * (0.5 * SCREEN_WIDTH)
+        triangleProjected.points[1].y = triangleProjected.points[1].y * (0.5 * SCREEN_HEIGHT)
+        triangleProjected.points[2].x = triangleProjected.points[2].x * (0.5 * SCREEN_WIDTH)
+        triangleProjected.points[2].y = triangleProjected.points[2].y * (0.5 * SCREEN_HEIGHT)
+        triangleProjected.points[3].x = triangleProjected.points[3].x * (0.5 * SCREEN_WIDTH)
+        triangleProjected.points[3].y = triangleProjected.points[3].y * (0.5 * SCREEN_HEIGHT)
+        
+
+        -- store the triangle for sorting and drawing
+        trianglesToDraw[#trianglesToDraw + 1] = triangleProjected
+      end
     end
   end
 
@@ -186,12 +204,64 @@ script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, functio
 
   -- draw triangles in order of distance from the camra, from the queue
   for i = 1, #trianglesToDraw do
-    local triangle = trianglesToDraw[i]
-    local color = triangle.color
-    TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
-    -- TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
+    local triangleToRaster = trianglesToDraw[i]
+
+    -- clip triangles against all edges of the screen, and add initial triangle
+    local triangleClipped = {}
+    local listTriangles = {triangleToRaster}
+    local newTriangles = 1
+
+    for p = 1, 4 do
+      
+      local trianglesToAdd = 0
+
+      while newTriangles > 0 do
+        -- take triangle from front of queue
+        local test = remove(listTriangles, 1)
+        newTriangles = newTriangles - 1
+
+        -- Clip it against a plane. We only need to test each 
+				-- subsequent plane, against subsequent new triangles
+				-- as all triangles after a plane clip are guaranteed
+				-- to lie on the inside of the plane
+        if p == 1 then
+          trianglesToAdd, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
+            Vector3d:new(0, 0, 0), Vector3d:new(0, 1, 0), test
+          )
+        elseif p == 2 then
+          trianglesToAdd, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
+            Vector3d:new(0, SCREEN_HEIGHT - 1, 0), Vector3d:new(0, -1, 0), test
+          )
+        elseif p == 3 then
+          trianglesToAdd, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
+            Vector3d:new(0, 0, 0), Vector3d:new(1, 0, 0), test
+          )
+        elseif p == 4 then
+          trianglesToAdd, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
+            Vector3d:new(SCREEN_WIDTH - 1, 0, 0), Vector3d:new(-1, 0, 0), test
+          )
+        end
+        
+        -- add new triangles to the back of the queue
+        for w = 1, trianglesToAdd do
+          listTriangles[#listTriangles + 1] = triangleClipped[w]
+        end
+      end
+
+      newTriangles = #listTriangles
+    end
+
+    -- draw the transformed, viewed, clipped, projected, sorted, clipped triangles
+
+    for t = 1, #listTriangles do
+      local triangle = listTriangles[t]
+      local color = triangle.color
+      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
+      TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
+    end
   end
   
+
 end)
 
 
