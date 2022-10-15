@@ -1,74 +1,80 @@
-local max = math.max
-local sort, remove = table.sort, table.remove
-local GL_DrawRect = Graphics.CSurface.GL_DrawRect
-local Point, FPS = Hyperspace.Point, Hyperspace.FPS
-
-
-local SCREEN_WIDTH = 1280
-local SCREEN_HEIGHT = 720
-
-
-
-local object = Mesh:LoadFromFile('axis.obj')
-
-
--- projection matrix
-local matMeshProjection = Matrix_4x4.CreateProjection(90, SCREEN_HEIGHT / SCREEN_WIDTH, 0.1, 1000)
+local Matrix_4x4 = require("Matrix_4x4")
+local Vector3d = require("Vector3d")
+local Mesh = require("Mesh")
+local Triangle = require("Triangle")
+local utils = require("util")
+local Color, GetColor, TriangleFill, TriangleOutline = utils.Color, utils.GetColor, utils.TriangleFill, utils.TriangleOutline
 
 
 
-local should_draw = false
-local elapsed_time = 0
-
--- script.on_internal_event(Defines.InternalEvents.ON_TICK, function()
---   elapsed_time = elapsed_time + (FPS.SpeedFactor / 16)
--- end)
-
-
--- camera vector
-local vCamera = Vector3d:new(0, 0, 0)
-local vLookDir = Vector3d:new(0, 0, 1)
-local yaw = 0
-
-script.on_game_event("STICK1_UP", false, function() -- forward
-  vCamera.y = vCamera.y + 0.5
-end)
-
-script.on_game_event("STICK1_DOWN", false, function() -- backward
-  vCamera.y = vCamera.y - 0.5
-end)
-
-script.on_game_event("STICK1_LEFT", false, function() -- left
-  vCamera.x = vCamera.x + 0.5
-end)
-
-script.on_game_event("STICK1_RIGHT", false, function() -- right
-  vCamera.x = vCamera.x - 0.5
-end)
+function love.load()
+  max = math.max
+  sort, remove = table.sort, table.remove
+  
+  
+  SCREEN_WIDTH = 1280
+  SCREEN_HEIGHT = 720
+  
+  
+  object = Mesh:LoadFromFile('obj/axis.obj')
+  
+  
+  -- projection matrix
+  matMeshProjection = Matrix_4x4.CreateProjection(90, SCREEN_HEIGHT / SCREEN_WIDTH, 0.1, 1000)
+  
+  
+  
+  -- camera vector
+  vCamera = Vector3d:new(0, 0, 0)
+  vLookDir = Vector3d:new(0, 0, 1)
+  yaw = 0
+  
 
 
-local vForward = vLookDir * 8
+  love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-script.on_game_event("STICK2_UP", false, function() -- foward
-  vCamera = vCamera + vForward
-end)
 
-script.on_game_event("STICK2_DOWN", false, function() -- backward
-  vCamera = vCamera - vForward
-end)
+  elapsedTime = 0
+end
 
-script.on_game_event("STICK2_LEFT", false, function() -- turn left
-  yaw = yaw - 1
-end)
 
-script.on_game_event("STICK2_RIGHT", false, function() -- turn right
-  yaw = yaw + 1
-end)
 
-script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, function()
-  if not should_draw then return end
+function love.update(dt)
+  elapsedTime = dt
 
-  GL_DrawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, Color(0, 0, 0, 1))
+  local isHeld = love.keyboard.isDown
+
+  if isHeld('up') then
+    vCamera.y = vCamera.y + 8 * elapsedTime
+  end
+  if isHeld('down') then
+    vCamera.y = vCamera.y - 8 * elapsedTime
+  end
+  if isHeld('left') then
+    vCamera.x = vCamera.x + 8 * elapsedTime
+  end
+  if isHeld('right') then
+    vCamera.x = vCamera.x - 8 * elapsedTime
+  end
+
+  local vForward = vLookDir * 8 * elapsedTime
+
+  if isHeld('w') then
+    vCamera = vCamera + vForward
+  end
+  if isHeld('s') then
+    vCamera = vCamera - vForward
+  end
+  if isHeld('a') then
+    yaw = yaw - 2 * elapsedTime
+  end
+  if isHeld('d') then
+    yaw = yaw + 2 * elapsedTime
+  end
+end
+
+
+function love.draw()
 
   local theta = 0
 
@@ -221,9 +227,9 @@ script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, functio
         newTriangles = newTriangles - 1
 
         -- Clip it against a plane. We only need to test each 
-				-- subsequent plane, against subsequent new triangles
-				-- as all triangles after a plane clip are guaranteed
-				-- to lie on the inside of the plane
+        -- subsequent plane, against subsequent new triangles
+        -- as all triangles after a plane clip are guaranteed
+        -- to lie on the inside of the plane
         if p == 1 then
           trianglesToAdd, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
             Vector3d:new(0, 0, 0), Vector3d:new(0, 1, 0), test
@@ -256,19 +262,9 @@ script.on_render_event(Defines.RenderEvents.LAYER_PLAYER, function()end, functio
     for t = 1, #listTriangles do
       local triangle = listTriangles[t]
       local color = triangle.color
-      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
+      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], Color(color[1], color[2], color[3]))
       TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
     end
   end
-  
 
-end)
-
-
-script.on_game_event("CANVAS_INIT", false, function()
-  should_draw = true
-end)
-
-script.on_game_event("CANVAS_END", false, function()
-  should_draw = false
-end)
+end

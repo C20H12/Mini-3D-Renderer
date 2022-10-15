@@ -20,45 +20,48 @@ Mesh.new = function(self, ...)
 end
 
 Mesh.LoadFromFile = function(self, fileName)
-  local file = io.open(fileName, "r")
-  if not file then 
-    log("Error: Mesh.LoadFromFile: file not found")
-    return false 
-  end
-
   -- cache of vertices
   local vertices = {}
 
   local o = {triangles = {}}
 
-  for line in file:lines() do
-
+  for line in love.filesystem.lines(fileName) do
+    local string = line
+    local junkChar
+    
     if line:sub(1, 1) == "v" then
       local verts = {}
-      for vert in string.gmatch(line, "%S+") do
-        insert(verts, tonumber(vert) or 'v')
+      for vert in string.gmatch(string, "%S+") do
+        insert(verts, vert)
       end
 
+      for i = 2, #verts do
+        verts[i] = tonumber(verts[i])
+      end
+
+      junkChar = verts[1]
       local vector = Vector3d:new(verts[2], verts[3], verts[4])
       insert(vertices, vector)
     end
 
     if line:sub(1, 1) == "f" then
       local points = {}
-      for point in string.gmatch(line, "%S+") do
-        if string.find(point, '/') then
-          insert(points, tonumber(string.gmatch(point, "%d+")()))
-        else
-          insert(points, tonumber(point) or 'f')
-        end
+      for point in string.gmatch(string, "%S+") do
+        insert(points, point)
       end
 
+      for i = 2, #points do
+        points[i] = tonumber(points[i])
+      end
+
+      junkChar = points[1]
       local triangle = Triangle:new(vertices[points[2]], vertices[points[3]], vertices[points[4]])
       insert(o.triangles, triangle)
     end
   end
 
-  file:close()
   self.__index = self
   return setmetatable(o, self)
 end
+
+return Mesh

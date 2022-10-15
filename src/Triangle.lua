@@ -129,3 +129,5 @@ Triangle.ClipAgainstPlane = function(planeP, planeN, inTri)
   end
   log("Error: Triangle.ClipAgainstPlane: Should never get here!")
 end
+
+return Triangle

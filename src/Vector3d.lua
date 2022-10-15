@@ -62,3 +62,5 @@ Vector3d.IntersectPlane = function(planeP, planeN, lineStart, lineEnd)
   local lineToIntersect = lineStartToEnd * t
   return lineStart + lineToIntersect
 end
+
+return Vector3d

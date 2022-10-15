@@ -133,3 +133,5 @@ Matrix_4x4.QuickInverse = function(m)
 
   return matrix
 end
+
+return Matrix_4x4
