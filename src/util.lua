@@ -14,7 +14,7 @@ end
 
 local function TriangleOutline(point1, point2, point3, r, g, b)
   love.graphics.setLineWidth(2)
-  love.graphics.setColor(r, g, b, 1)
+  love.graphics.setColor(Color(r, g, b))
 
   love.graphics.line(
     SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y, 
@@ -31,7 +31,7 @@ local function TriangleOutline(point1, point2, point3, r, g, b)
 end
 
 local function TriangleFill(point1, point2, point3, r, g, b)
-  love.graphics.setColor(r, g, b, 1)
+  love.graphics.setColor(Color(r, g, b))
   love.graphics.polygon(
     'fill', 
     SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y, 
@@ -44,9 +44,4 @@ local function GetColor(dp)
   return {dp ^ 2 * 255, dp ^ 2 * 255, dp ^ 2 * 255}
 end
 
-return {
-  Color = Color,
-  TriangleOutline = TriangleOutline,
-  TriangleFill = TriangleFill,
-  GetColor = GetColor
-}
+return function() return TriangleOutline, TriangleFill, GetColor, Color end

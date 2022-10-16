@@ -2,8 +2,7 @@ local Matrix_4x4 = require("Matrix_4x4")
 local Vector3d = require("Vector3d")
 local Mesh = require("Mesh")
 local Triangle = require("Triangle")
-local utils = require("util")
-local Color, GetColor, TriangleFill, TriangleOutline = utils.Color, utils.GetColor, utils.TriangleFill, utils.TriangleOutline
+local TriangleOutline, TriangleFill, GetColor, Color = require("util")()
 
 
 
@@ -33,31 +32,28 @@ function love.load()
 
   love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-
-  elapsedTime = 0
 end
 
 
 
 function love.update(dt)
-  elapsedTime = dt
 
   local isHeld = love.keyboard.isDown
 
   if isHeld('up') then
-    vCamera.y = vCamera.y + 8 * elapsedTime
+    vCamera.y = vCamera.y + 8 * dt
   end
   if isHeld('down') then
-    vCamera.y = vCamera.y - 8 * elapsedTime
+    vCamera.y = vCamera.y - 8 * dt
   end
   if isHeld('left') then
-    vCamera.x = vCamera.x + 8 * elapsedTime
+    vCamera.x = vCamera.x + 8 * dt
   end
   if isHeld('right') then
-    vCamera.x = vCamera.x - 8 * elapsedTime
+    vCamera.x = vCamera.x - 8 * dt
   end
 
-  local vForward = vLookDir * 8 * elapsedTime
+  local vForward = vLookDir * 8 * dt
 
   if isHeld('w') then
     vCamera = vCamera + vForward
@@ -66,10 +62,10 @@ function love.update(dt)
     vCamera = vCamera - vForward
   end
   if isHeld('a') then
-    yaw = yaw - 2 * elapsedTime
+    yaw = yaw - 2 * dt
   end
   if isHeld('d') then
-    yaw = yaw + 2 * elapsedTime
+    yaw = yaw + 2 * dt
   end
 end
 
@@ -257,12 +253,12 @@ function love.draw()
       newTriangles = #listTriangles
     end
 
+    
     -- draw the transformed, viewed, clipped, projected, sorted, clipped triangles
-
     for t = 1, #listTriangles do
       local triangle = listTriangles[t]
       local color = triangle.color
-      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], Color(color[1], color[2], color[3]))
+      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
       TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
     end
   end
