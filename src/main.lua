@@ -2,21 +2,22 @@ local Matrix_4x4 = require("Matrix_4x4")
 local Vector3d = require("Vector3d")
 local Mesh = require("Mesh")
 local Triangle = require("Triangle")
-local TriangleOutline, TriangleFill, GetColor, Color = require("util")()
+local TriangleOutline, TriangleFill, GetColor = require("util")()
 
+
+local max = math.max
+local sort, remove = table.sort, table.remove
+
+local SCREEN_WIDTH = 1280
+local SCREEN_HEIGHT = 720
 
 
 function love.load()
-  max = math.max
-  sort, remove = table.sort, table.remove
-  
-  
-  SCREEN_WIDTH = 1280
-  SCREEN_HEIGHT = 720
   
   
   object = Mesh:LoadFromFile('obj/axis.obj')
-  
+
+    
   
   -- projection matrix
   matMeshProjection = Matrix_4x4.CreateProjection(90, SCREEN_HEIGHT / SCREEN_WIDTH, 0.1, 1000)

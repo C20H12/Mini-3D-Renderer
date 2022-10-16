@@ -53,7 +53,8 @@ Vector3d.Normalize = function(self)
 end
 
 Vector3d.IntersectPlane = function(planeP, planeN, lineStart, lineEnd)
-  planeN = Vector3d:new(planeN.x, planeN.y, planeN.z):Normalize()
+  -- planeN = Vector3d:new(planeN.x, planeN.y, planeN.z):Normalize()
+  planeN:Normalize()
   local planeD = -Vector3d.GetDotProduct(planeN, planeP)
   local ad = Vector3d.GetDotProduct(lineStart, planeN)
   local bd = Vector3d.GetDotProduct(lineEnd, planeN)

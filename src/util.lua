@@ -44,4 +44,13 @@ local function GetColor(dp)
   return {dp ^ 2 * 255, dp ^ 2 * 255, dp ^ 2 * 255}
 end
 
-return function() return TriangleOutline, TriangleFill, GetColor, Color end
+local function PrintAvgZ(triangle)
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.print(
+    (triangle.points[1].z + triangle.points[2].z + triangle.points[3].z) / 3, 
+    SCREEN_WIDTH - ((triangle.points[1].x + triangle.points[2].x + triangle.points[3].x) / 3), 
+    SCREEN_HEIGHT - ((triangle.points[1].y + triangle.points[2].y + triangle.points[3].y) / 3)
+  )
+end
+
+return function() return TriangleOutline, TriangleFill, GetColor end
