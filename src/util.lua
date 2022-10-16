@@ -3,18 +3,9 @@ local SCREEN_WIDTH = 1280
 local SCREEN_HEIGHT = 720
 
 
-local function Color(r, g, b, a)
-  local rr, gg, bb, aa;
-  rr = r / 255
-  gg = g / 255
-  bb = b / 255
-  aa = a
-  return rr, gg, bb, aa
-end
-
 local function TriangleOutline(point1, point2, point3, r, g, b)
   love.graphics.setLineWidth(2)
-  love.graphics.setColor(Color(r, g, b))
+  love.graphics.setColor(r, g, b)
 
   love.graphics.line(
     SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y, 
@@ -31,7 +22,7 @@ local function TriangleOutline(point1, point2, point3, r, g, b)
 end
 
 local function TriangleFill(point1, point2, point3, r, g, b)
-  love.graphics.setColor(Color(r, g, b))
+  love.graphics.setColor(r, g, b)
   love.graphics.polygon(
     'fill', 
     SCREEN_WIDTH - point1.x, SCREEN_HEIGHT - point1.y, 
@@ -41,7 +32,7 @@ local function TriangleFill(point1, point2, point3, r, g, b)
 end
 
 local function GetColor(dp)
-  return {dp ^ 2 * 255, dp ^ 2 * 255, dp ^ 2 * 255}
+  return {dp ^ 1.5, dp ^ 1.5, dp ^ 1.5}
 end
 
 local function PrintAvgZ(triangle)
