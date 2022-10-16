@@ -1,8 +1,9 @@
+local Vector3d = require("Vector3d")
 local sin, cos, tan, PI = math.sin, math.cos, math.tan, math.pi
 
 
 ---@class Matrix_4x4
-Matrix_4x4 = {}
+local Matrix_4x4 = {}
 
 Matrix_4x4.matrix = {}
 

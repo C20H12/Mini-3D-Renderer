@@ -1,8 +1,9 @@
+local Triangle = require("Triangle")
 local insert = table.insert
 
 
 ---@class Mesh
-Mesh = {}
+local Mesh = {}
 
 Mesh.triangles = {}
 

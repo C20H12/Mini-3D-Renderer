@@ -2,7 +2,7 @@ local sqrt = math.sqrt
 
 
 ---@class Vector3d
-Vector3d = {}
+local Vector3d = {}
 
 Vector3d.x = 0
 Vector3d.y = 0

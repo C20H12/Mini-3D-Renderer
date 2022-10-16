@@ -1,5 +1,8 @@
+local Vector3d = require("Vector3d")
+
+
 ---@class Triangle
-Triangle = {}
+local Triangle = {}
 
 Triangle.points = {}
 Triangle.color = {0, 0, 0}
@@ -13,7 +16,7 @@ Triangle.new = function(self, vec1, vec2, vec3)
 
   for _, vec in ipairs(o.points) do
     if getmetatable(vec) ~= Vector3d then
-      return log("Error: Triangle.new: vec is not a Vector3d")
+      return error("Error: Triangle.new: vec is not a Vector3d")
     end
   end
 
@@ -95,7 +98,7 @@ Triangle.ClipAgainstPlane = function(planeP, planeN, inTri)
     )
 
     -- Copy appearance info to new triangle
-    outTri.color = {0, 0, 255} --inTri.color
+    outTri.color = inTri.color -- {0, 0, 255}
         
     return 1, outTri, nil
   end
@@ -122,8 +125,8 @@ Triangle.ClipAgainstPlane = function(planeP, planeN, inTri)
     )
 
     -- Copy appearance info to new triangles
-    outTri1.color = {255, 0, 0} --inTri.color
-    outTri2.color = {0, 255, 0} --inTri.color
+    outTri1.color =  inTri.color -- {255, 0, 0}
+    outTri2.color = inTri.color  --{0, 255, 0}
 
     return 2, outTri1, outTri2
   end
