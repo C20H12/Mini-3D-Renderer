@@ -2,7 +2,8 @@ local Matrix_4x4 = require("Matrix_4x4")
 local Vector3d = require("Vector3d")
 local Mesh = require("Mesh")
 local Triangle = require("Triangle")
-local TriangleOutline, TriangleFill, GetColor = require("util")()
+local TriangleOutline, TriangleFill, GetColor, TriangleTextured = require("util")()
+local Vector2d = require("Vector2d")
 
 
 local max = math.max
@@ -15,7 +16,34 @@ local SCREEN_HEIGHT = 720
 function love.load()
   
   
-  object = Mesh:LoadFromFile('obj/axis.obj')
+  -- object = Mesh:LoadFromFile('obj/axis.obj')
+
+  
+  object = Mesh:new(
+    -- SOUTH
+    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
+    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+
+    -- EAST                                                      
+    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 0.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+
+    -- NORTH                                                     
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+
+    -- WEST                                                      
+    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
+    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+
+    -- TOP                                                       
+    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
+    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+
+    -- BOTTOM                                                    
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) )
+  )
 
     
   
@@ -29,6 +57,8 @@ function love.load()
   vLookDir = Vector3d:new(0, 0, 1)
   yaw = 0
   
+
+  spriteTexture1 = love.image.newImageData("tex/Sylvan.png")
 
 
   love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -113,6 +143,9 @@ function love.draw()
       matWorld * triangle.points[2],
       matWorld * triangle.points[3]
     )
+    triangleTransformed.texture[1] = triangle.texture[1]
+    triangleTransformed.texture[2] = triangle.texture[2]
+    triangleTransformed.texture[3] = triangle.texture[3]
 
     
     -- get lines from triangle
@@ -149,6 +182,9 @@ function love.draw()
         matView * triangleTransformed.points[3]
       )
       triangleViewed.color = triangleTransformed.color
+      triangleViewed.texture[1] = triangleTransformed.texture[1]
+      triangleViewed.texture[2] = triangleTransformed.texture[2]
+      triangleViewed.texture[3] = triangleTransformed.texture[3]
 
 
       -- clip viewed triangle against near plane, this could form two 
@@ -170,6 +206,10 @@ function love.draw()
           matMeshProjection * triangleClipped[j].points[3]
         )
         triangleProjected.color = triangleClipped[j].color
+
+        triangleProjected.texture[1] = triangleClipped[j].texture[1]
+        triangleProjected.texture[2] = triangleClipped[j].texture[2]
+        triangleProjected.texture[3] = triangleClipped[j].texture[3]
 
 
         -- scale into view, manual normalising
@@ -259,8 +299,14 @@ function love.draw()
     for t = 1, #listTriangles do
       local triangle = listTriangles[t]
       local color = triangle.color
-      TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
-      TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 0, 0, 0)
+      -- TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
+      TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 1, 1, 1)
+      TriangleTextured(
+        triangle.points[1].x, triangle.points[1].y, triangle.texture[1].u, triangle.texture[1].v,
+        triangle.points[2].x, triangle.points[2].y, triangle.texture[2].u, triangle.texture[2].v,
+        triangle.points[3].x, triangle.points[3].y, triangle.texture[3].u, triangle.texture[3].v,
+        spriteTexture1
+      )
     end
   end
 
