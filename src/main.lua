@@ -218,6 +218,15 @@ function love.draw()
         triangleProjected.points[3] = triangleProjected.points[3] / triangleProjected.points[3].w
         
 
+        -- invert x and y
+        triangleProjected.points[1].x = triangleProjected.points[1].x * -1
+        triangleProjected.points[2].x = triangleProjected.points[2].x * -1
+        triangleProjected.points[3].x = triangleProjected.points[3].x * -1
+        triangleProjected.points[1].y = triangleProjected.points[1].y * -1
+        triangleProjected.points[2].y = triangleProjected.points[2].y * -1
+        triangleProjected.points[3].y = triangleProjected.points[3].y * -1
+
+
         -- scale into view
         local vOffsetView = Vector3d:new(1, 1, 0)
         triangleProjected.points[1] = triangleProjected.points[1] + vOffsetView
