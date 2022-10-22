@@ -1,4 +1,4 @@
-local abs = math.abs
+local abs, floor = math.abs, math.floor
 
 
 local function TriangleOutline(point1, point2, point3, r, g, b)
@@ -120,6 +120,8 @@ local function TriangleTextured(
       local t = 0
 
       for j = ax, bx do
+        if floor(t) == 1 then t = 1 end
+
         tex_final_u = (1 - t) * tex_start_u + t * tex_end_u
         tex_final_v = (1 - t) * tex_start_v + t * tex_end_v
 
@@ -169,23 +171,8 @@ local function TriangleTextured(
       local t = 0
 
       for j = ax, bx do
-        -- print(t, tex_start_u, tex_end_u)
-        -- print((1 - t) * tex_start_u + t * tex_end_u)
-        print('t:   ' ..  t)
-        print('t == 1:   ' .. tostring(t == 1))
-        print('1 - t:    ' .. 1 - t)
-        print('1 * t:    ' .. 1 * t)
-        print('1 / t:    ' .. 1 / t)
-        print('1 + t:    ' .. 1 + t)
+        if floor(t) == 1 then t = 1 end
         
-        print('t - 1:    ' .. t - 1)
-        print('t * 1:    ' .. t * 1)
-        print('t / 1:    ' .. t / 1)
-        print('t + 1:    ' .. t + 1)
-        
-        -- print(tex_start_u)
-        -- print(t * tex_end_u)
-        print('---')
         tex_final_u = (1 - t) * tex_start_u + t * tex_end_u
         tex_final_v = (1 - t) * tex_start_v + t * tex_end_v
 
