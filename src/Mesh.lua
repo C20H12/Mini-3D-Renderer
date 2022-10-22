@@ -1,4 +1,5 @@
 local Triangle = require("Triangle")
+local Vector3d = require("Vector3d")
 local insert = table.insert
 
 
