@@ -21,28 +21,28 @@ function love.load()
   
   object = Mesh:new(
     -- SOUTH
-    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
-    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
     -- EAST                                                      
-    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
-    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 0.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 0.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
     -- NORTH                                                     
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
     -- WEST                                                      
-    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
-    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
     -- TOP                                                       
-    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
-    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) ),
+    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
     -- BOTTOM                                                    
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(0, 0, 1),  Vector2d:new(1, 0, 1) ),
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1, 1),  Vector2d:new(1, 0, 1),  Vector2d:new(1, 1, 1) )
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) )
   )
 
     
@@ -55,10 +55,14 @@ function love.load()
   -- camera vector
   vCamera = Vector3d:new(0, 0, 0)
   vLookDir = Vector3d:new(0, 0, 1)
-  yaw = 0
+  nYaw = 0
   
 
-  spriteTexture1 = love.image.newImageData("tex/Sylvan.png")
+  spriteTexture1 = love.image.newImageData("tex/auga.png")
+  sprTex1Width, sprTex1Height = spriteTexture1:getDimensions()
+  
+
+  theta = 0
 
 
   love.window.setMode(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -93,17 +97,17 @@ function love.update(dt)
     vCamera = vCamera - vForward
   end
   if isHeld('a') then
-    yaw = yaw - 2 * dt
+    nYaw = nYaw - 2 * dt
   end
   if isHeld('d') then
-    yaw = yaw + 2 * dt
+    nYaw = nYaw + 2 * dt
   end
+
+  -- theta = theta + dt
 end
 
 
 function love.draw()
-
-  local theta = 0
 
   -- rotation matrices
   local matRotationZ = Matrix_4x4.CreateRotationZ(theta * 0.5)
@@ -121,7 +125,7 @@ function love.draw()
   -- camera movements 
   local vUp = Vector3d:new(0, 1, 0)
   local vTarget = Vector3d:new(0, 0, 1)
-  local matCameraRot = Matrix_4x4.CreateRotationY(yaw)
+  local matCameraRot = Matrix_4x4.CreateRotationY(nYaw)
   vLookDir = matCameraRot * vTarget
   vTarget = vCamera + vLookDir
 
@@ -143,18 +147,24 @@ function love.draw()
       matWorld * triangle.points[2],
       matWorld * triangle.points[3]
     )
-    triangleTransformed.texture[1] = triangle.texture[1]
-    triangleTransformed.texture[2] = triangle.texture[2]
-    triangleTransformed.texture[3] = triangle.texture[3]
+    triangleTransformed.texture[1].u = triangle.texture[1].u
+    triangleTransformed.texture[1].v = triangle.texture[1].v
+    triangleTransformed.texture[1].w = triangle.texture[1].w
+    triangleTransformed.texture[2].u = triangle.texture[2].u
+    triangleTransformed.texture[2].v = triangle.texture[2].v
+    triangleTransformed.texture[2].w = triangle.texture[2].w
+    triangleTransformed.texture[3].u = triangle.texture[3].u
+    triangleTransformed.texture[3].v = triangle.texture[3].v
+    triangleTransformed.texture[3].w = triangle.texture[3].w
 
     
     -- get lines from triangle
-    local line1 = triangleTransformed.points[2] - triangleTransformed.points[1]
-    local line2 = triangleTransformed.points[3] - triangleTransformed.points[1]
+    local vLine1 = triangleTransformed.points[2] - triangleTransformed.points[1]
+    local vLine2 = triangleTransformed.points[3] - triangleTransformed.points[1]
 
     
     -- take cross product of lines to get normal to the triangle face
-    local normal = Vector3d.GetCrossProduct(line1, line2):Normalize()
+    local normal = Vector3d.GetCrossProduct(vLine1, vLine2):Normalize()
 
 
     -- get the ray from the camera to the triangle
@@ -168,11 +178,11 @@ function love.draw()
 
 
       -- how aligned are the light direction and the triangle normal?
-      local dotProduct = max(0.1, Vector3d.GetDotProduct(vLightDirection, normal))
+      local nDotProduct = max(0.1, Vector3d.GetDotProduct(vLightDirection, normal))
 
 
       -- choose color
-      triangleTransformed.color = GetColor(dotProduct)
+      triangleTransformed.color = GetColor(nDotProduct)
 
 
       -- convert world space --> view space
@@ -182,22 +192,28 @@ function love.draw()
         matView * triangleTransformed.points[3]
       )
       triangleViewed.color = triangleTransformed.color
-      triangleViewed.texture[1] = triangleTransformed.texture[1]
-      triangleViewed.texture[2] = triangleTransformed.texture[2]
-      triangleViewed.texture[3] = triangleTransformed.texture[3]
+      triangleViewed.texture[1].u = triangleTransformed.texture[1].u
+      triangleViewed.texture[1].v = triangleTransformed.texture[1].v
+      triangleViewed.texture[1].w = triangleTransformed.texture[1].w
+      triangleViewed.texture[2].u = triangleTransformed.texture[2].u
+      triangleViewed.texture[2].v = triangleTransformed.texture[2].v
+      triangleViewed.texture[2].w = triangleTransformed.texture[2].w
+      triangleViewed.texture[3].u = triangleTransformed.texture[3].u
+      triangleViewed.texture[3].v = triangleTransformed.texture[3].v
+      triangleViewed.texture[3].w = triangleTransformed.texture[3].w
 
 
       -- clip viewed triangle against near plane, this could form two 
       -- additional triangles
-      local clippedTrianglesCount = 0
+      local nClippedTrianglesCount = 0
       local triangleClipped = {}
-      clippedTrianglesCount, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
+      nClippedTrianglesCount, triangleClipped[1], triangleClipped[2] = Triangle.ClipAgainstPlane(
         Vector3d:new(0, 0, 0.1), Vector3d:new(0, 0, 1), triangleViewed
       )
 
 
       -- project as many clipped triangles as we have
-      for j = 1, clippedTrianglesCount do
+      for j = 1, nClippedTrianglesCount do
         
         -- project the 3D --> 2D
         local triangleProjected = Triangle:new(
@@ -206,10 +222,29 @@ function love.draw()
           matMeshProjection * triangleClipped[j].points[3]
         )
         triangleProjected.color = triangleClipped[j].color
+        triangleProjected.texture[1].u = triangleClipped[j].texture[1].u
+        triangleProjected.texture[1].v = triangleClipped[j].texture[1].v
+        triangleProjected.texture[1].w = triangleClipped[j].texture[1].w
+        triangleProjected.texture[2].u = triangleClipped[j].texture[2].u
+        triangleProjected.texture[2].v = triangleClipped[j].texture[2].v
+        triangleProjected.texture[2].w = triangleClipped[j].texture[2].w
+        triangleProjected.texture[3].u = triangleClipped[j].texture[3].u
+        triangleProjected.texture[3].v = triangleClipped[j].texture[3].v
+        triangleProjected.texture[3].w = triangleClipped[j].texture[3].w
 
-        triangleProjected.texture[1] = triangleClipped[j].texture[1]
-        triangleProjected.texture[2] = triangleClipped[j].texture[2]
-        triangleProjected.texture[3] = triangleClipped[j].texture[3]
+
+        -- normalise the textures
+        triangleProjected.texture[1].u = triangleProjected.texture[1].u / triangleProjected.points[1].w
+        triangleProjected.texture[2].u = triangleProjected.texture[2].u / triangleProjected.points[2].w
+        triangleProjected.texture[3].u = triangleProjected.texture[3].u / triangleProjected.points[3].w
+
+        triangleProjected.texture[1].v = triangleProjected.texture[1].v / triangleProjected.points[1].w
+        triangleProjected.texture[2].v = triangleProjected.texture[2].v / triangleProjected.points[2].w
+        triangleProjected.texture[3].v = triangleProjected.texture[3].v / triangleProjected.points[3].w
+
+        triangleProjected.texture[1].w = 1 / triangleProjected.points[1].w
+        triangleProjected.texture[2].w = 1 / triangleProjected.points[2].w
+        triangleProjected.texture[3].w = 1 / triangleProjected.points[3].w
 
 
         -- scale into view, manual normalising
@@ -261,16 +296,16 @@ function love.draw()
     -- clip triangles against all edges of the screen, and add initial triangle
     local triangleClipped = {}
     local listTriangles = {triangleToRaster}
-    local newTriangles = 1
+    local nNewTriangles = 1
 
     for p = 1, 4 do
       
       local trianglesToAdd = 0
 
-      while newTriangles > 0 do
+      while nNewTriangles > 0 do
         -- take triangle from front of queue
         local test = remove(listTriangles, 1)
-        newTriangles = newTriangles - 1
+        nNewTriangles = nNewTriangles - 1
 
         -- Clip it against a plane. We only need to test each 
         -- subsequent plane, against subsequent new triangles
@@ -300,7 +335,7 @@ function love.draw()
         end
       end
 
-      newTriangles = #listTriangles
+      nNewTriangles = #listTriangles
     end
 
     
@@ -311,10 +346,10 @@ function love.draw()
       -- TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
       TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 1, 1, 1)
       TriangleTextured(
-        triangle.points[1].x, triangle.points[1].y, triangle.texture[1].u, triangle.texture[1].v,
-        triangle.points[2].x, triangle.points[2].y, triangle.texture[2].u, triangle.texture[2].v,
-        triangle.points[3].x, triangle.points[3].y, triangle.texture[3].u, triangle.texture[3].v,
-        spriteTexture1
+        triangle.points[1].x, triangle.points[1].y, triangle.texture[1].u, triangle.texture[1].v, triangle.texture[1].w,
+        triangle.points[2].x, triangle.points[2].y, triangle.texture[2].u, triangle.texture[2].v, triangle.texture[2].w,
+        triangle.points[3].x, triangle.points[3].y, triangle.texture[3].u, triangle.texture[3].v, triangle.texture[3].w,
+        spriteTexture1, sprTex1Width, sprTex1Height
       )
     end
   end
