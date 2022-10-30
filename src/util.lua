@@ -46,8 +46,11 @@ local function TriangleTextured(
   x1, y1, u1, v1, w1,
   x2, y2, u2, v2, w2,
   x3, y3, u3, v3, w3,
-  texture, textureWidth, textureHeight
+  texture, textureWidth, textureHeight,
+  lightR, lightG, lightB,
+  buffer
 )
+  x1, y1, x2, y2, x3, y3 = floor(x1), floor(y1), floor(x2), floor(y2), floor(x3), floor(y3)
 
   if y2 < y1 then
     y1, y2 = y2, y1
@@ -106,8 +109,8 @@ local function TriangleTextured(
 
   if dy1 ~= 0 then
     for i = y1, y2 do
-      local ax = x1 + (i - y1) * dax_step
-      local bx = x1 + (i - y1) * dbx_step
+      local ax = floor(x1 + (i - y1) * dax_step)
+      local bx = floor(x1 + (i - y1) * dbx_step)
 
       local tex_start_u = u1 + (i - y1) * du1_step
       local tex_start_v = v1 + (i - y1) * dv1_step
@@ -131,20 +134,23 @@ local function TriangleTextured(
       local tstep = 1 / (bx - ax)
       local t = 0
 
-      for j = ax, bx do
+      for j = ax, bx - 1 do
         if floor(t) == 1 then t = 1 end
-        if tex_start_u < 0 then tex_start_u = 0 end
 
         tex_final_u = (1 - t) * tex_start_u + t * tex_end_u
         tex_final_v = (1 - t) * tex_start_v + t * tex_end_v
         tex_final_w = (1 - t) * tex_start_w + t * tex_end_w
 
-        local r, g, b, a = texture:getPixel(
-          (tex_final_u / tex_final_w) * (textureWidth - 1),
-          (tex_final_v / tex_final_w) * (textureHeight - 1)
-        )
-        love.graphics.points { {j, i, r, g, b, a} }
-
+        if tex_final_w > buffer[abs(i * SCREEN_WIDTH + j)] then -- TODO: check later if abs is needed
+          local r, g, b, a = texture:getPixel(
+            (tex_final_u / tex_final_w) * (textureWidth - 1),
+            (tex_final_v / tex_final_w) * (textureHeight - 1)
+          )
+          -- r, g, b = r * lightR, g * lightG, b * lightB
+          love.graphics.points { {j, i, r, g, b, a} }
+          buffer[abs(i * SCREEN_WIDTH + j)] = tex_final_w
+        end
+          
         t = t + tstep
       end
     end
@@ -168,8 +174,8 @@ local function TriangleTextured(
 
   if dy1 ~= 0 then
     for i = y2, y3 do
-      local ax = x2 + (i - y2) * dax_step
-      local bx = x1 + (i - y1) * dbx_step
+      local ax = floor(x2 + (i - y2) * dax_step)
+      local bx = floor(x1 + (i - y1) * dbx_step)
 
       local tex_start_u = u2 + (i - y2) * du1_step
       local tex_start_v = v2 + (i - y2) * dv1_step
@@ -193,20 +199,22 @@ local function TriangleTextured(
       local tstep = 1 / (bx - ax)
       local t = 0
 
-      for j = ax, bx do
+      for j = ax, bx - 1 do
         if floor(t) == 1 then t = 1 end
-        if tex_start_u < 0 then tex_start_u = 0 end
         
-
         tex_final_u = (1 - t) * tex_start_u + t * tex_end_u
         tex_final_v = (1 - t) * tex_start_v + t * tex_end_v
         tex_final_w = (1 - t) * tex_start_w + t * tex_end_w
 
-        local r, g, b, a = texture:getPixel(
-          (tex_final_u / tex_final_w) * (textureWidth - 1),
-          (tex_final_v / tex_final_w) * (textureHeight - 1)
-        )
-        love.graphics.points { {j, i, r, g, b, a} }
+        if tex_final_w > buffer[abs(i * SCREEN_WIDTH + j)] then
+          local r, g, b, a = texture:getPixel(
+            (tex_final_u / tex_final_w) * (textureWidth - 1),
+            (tex_final_v / tex_final_w) * (textureHeight - 1)
+          )
+          -- r, g, b = r * lightR, g * lightG, b * lightB
+          love.graphics.points { {j, i, r, g, b, a} }
+          buffer[abs(i * SCREEN_WIDTH + j)] = tex_final_w
+        end
 
         t = t + tstep
       end

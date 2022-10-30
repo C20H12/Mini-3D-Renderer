@@ -4,46 +4,46 @@ local Mesh = require("Mesh")
 local Triangle = require("Triangle")
 local TriangleOutline, TriangleFill, GetColor, TriangleTextured = require("util")()
 local Vector2d = require("Vector2d")
-
+require('consts')
 
 local max = math.max
 local sort, remove = table.sort, table.remove
 
-local SCREEN_WIDTH = 1280
-local SCREEN_HEIGHT = 720
 
 
 function love.load()
-  
-  
-  -- object = Mesh:LoadFromFile('obj/axis.obj')
+
+  arrDepthBuffer = {}
 
   
-  object = Mesh:new(
-    -- SOUTH
-    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
-    Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
+  object = Mesh:LoadFromFile('obj/bigtest.obj', true)
 
-    -- EAST                                                      
-    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
-    Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 0.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
+  
+  -- object = Mesh:new(
+  --   -- SOUTH
+  --   Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+  --   Triangle:new( Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
-    -- NORTH                                                     
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
+  --   -- EAST                                                      
+  --   Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+  --   Triangle:new( Vector3d:new(1.0, 0.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 0.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
-    -- WEST                                                      
-    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
-    Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
+  --   -- NORTH                                                     
+  --   Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+  --   Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
-    -- TOP                                                       
-    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
-    Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
+  --   -- WEST                                                      
+  --   Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+  --   Triangle:new( Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
 
-    -- BOTTOM                                                    
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
-    Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) )
-  )
+  --   -- TOP                                                       
+  --   Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(0.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+  --   Triangle:new( Vector3d:new(0.0, 1.0, 0.0),  Vector3d:new(1.0, 1.0, 1.0),  Vector3d:new(1.0, 1.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) ),
+
+  --   -- BOTTOM                                                    
+  --   Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(0, 0),  Vector2d:new(1, 0) ),
+  --   Triangle:new( Vector3d:new(1.0, 0.0, 1.0),  Vector3d:new(0.0, 0.0, 0.0),  Vector3d:new(1.0, 0.0, 0.0),  Vector2d:new(0, 1),  Vector2d:new(1, 0),  Vector2d:new(1, 1) )
+  -- )
 
     
   
@@ -58,7 +58,7 @@ function love.load()
   nYaw = 0
   
 
-  spriteTexture1 = love.image.newImageData("tex/auga.png")
+  spriteTexture1 = love.image.newImageData("tex/High.png")
   sprTex1Width, sprTex1Height = spriteTexture1:getDimensions()
   
 
@@ -282,12 +282,20 @@ function love.draw()
     end
   end
 
-  -- sort the triangles from back to front
-  sort(trianglesToDraw, function(t1, t2)
-    local zAvg1 = (t1.points[1].z + t1.points[2].z + t1.points[3].z) / 3
-    local zAvg2 = (t2.points[1].z + t2.points[2].z + t2.points[3].z) / 3
-    return zAvg1 > zAvg2
-  end)
+  -- sort the triangles from back to front -- not needed after depth buffer is added
+  -- sort(trianglesToDraw, function(t1, t2)
+  --   local zAvg1 = (t1.points[1].z + t1.points[2].z + t1.points[3].z) / 3
+  --   local zAvg2 = (t2.points[1].z + t2.points[2].z + t2.points[3].z) / 3
+  --   return zAvg1 > zAvg2
+  -- end)
+
+  -- clear bg
+  love.graphics.setBackgroundColor(0, 225 / 255, 1)
+
+  -- clear depth buffer
+  for i = 0, SCREEN_WIDTH * SCREEN_HEIGHT do
+    arrDepthBuffer[i] = 0
+  end
 
   -- draw triangles in order of distance from the camra, from the queue
   for i = 1, #trianglesToDraw do
@@ -344,13 +352,35 @@ function love.draw()
       local triangle = listTriangles[t]
       local color = triangle.color
       -- TriangleFill(triangle.points[1], triangle.points[2], triangle.points[3], color[1], color[2], color[3])
-      TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 1, 1, 1)
+      -- TriangleOutline(triangle.points[1], triangle.points[2], triangle.points[3], 1, 1, 1)
       TriangleTextured(
         triangle.points[1].x, triangle.points[1].y, triangle.texture[1].u, triangle.texture[1].v, triangle.texture[1].w,
         triangle.points[2].x, triangle.points[2].y, triangle.texture[2].u, triangle.texture[2].v, triangle.texture[2].w,
         triangle.points[3].x, triangle.points[3].y, triangle.texture[3].u, triangle.texture[3].v, triangle.texture[3].w,
-        spriteTexture1, sprTex1Width, sprTex1Height
+        spriteTexture1, sprTex1Width, sprTex1Height,
+        triangle.color[1], triangle.color[2], triangle.color[3],
+        arrDepthBuffer
       )
+      -- local mesh = love.graphics.newMesh(
+      --   {
+      --     {triangle.points[1].x, triangle.points[1].y, triangle.texture[1].u / triangle.texture[1].w, triangle.texture[1].v / triangle.texture[1].w},
+      --     {triangle.points[2].x, triangle.points[2].y, triangle.texture[2].u / triangle.texture[2].w, triangle.texture[2].v / triangle.texture[2].w},
+      --     {triangle.points[3].x, triangle.points[3].y, triangle.texture[3].u / triangle.texture[3].w, triangle.texture[3].v / triangle.texture[3].w}
+      --   }
+      -- )
+      -- local shader = love.graphics.newShader([[
+      -- extern float z;
+      -- extern float w;
+      -- vec4 position(mat4 transform_projection, vec4 vertex_position) {
+      --   return transform_projection * vec4(vertex_position.x, vertex_position.y, z, w);
+      -- }
+      -- ]])
+      -- shader:send('z', triangle.points[1].z)
+      -- shader:send('w', triangle.points[1].w)
+      -- love.graphics.setShader(shader)
+      -- love.graphics.print(shader:getWarnings(), 0, 0)
+      -- mesh:setTexture(love.graphics.newImage(spriteTexture1))
+      -- love.graphics.drawInstanced(mesh, 1)
     end
   end
 
