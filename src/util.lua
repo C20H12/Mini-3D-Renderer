@@ -50,8 +50,10 @@ local function TriangleTextured(
   lightR, lightG, lightB,
   buffer
 )
+  -- these should be integers
   x1, y1, x2, y2, x3, y3 = floor(x1), floor(y1), floor(x2), floor(y2), floor(x3), floor(y3)
 
+  -- sort the points by highest y, manually
   if y2 < y1 then
     y1, y2 = y2, y1
     x1, x2 = x2, x1
@@ -76,6 +78,7 @@ local function TriangleTextured(
     w2, w3 = w3, w2
   end
 
+  -- find the difference between the 1st and 2nd points
   local dy1 = y2 - y1
   local dx1 = x2 - x1
   local dv1 = v2 - v1
@@ -88,13 +91,16 @@ local function TriangleTextured(
   local du2 = u3 - u1
   local dw2 = w3 - w1
 
+  -- final points to sample from
   local tex_final_u, tex_final_v, tex_final_w = 0, 0, 0
 
+  -- step value on how much to move for each line
   local dax_step, dbx_step = 0, 0
   local du1_step, dv1_step = 0, 0
   local du2_step, dv2_step = 0, 0
   local dw1_step, dw2_step = 0, 0
 
+  -- if the line between these two points is horizontal, there is no dx
   if dy1 ~= 0 then dax_step = dx1 / abs(dy1) end
   if dy2 ~= 0 then dbx_step = dx2 / abs(dy2) end
 
@@ -106,9 +112,12 @@ local function TriangleTextured(
   if dy2 ~= 0 then dv2_step = dv2 / abs(dy2) end
   if dy2 ~= 0 then dw2_step = dw2 / abs(dy2) end
   
-
+  -- as long as the line is not horizontal, draw the top half
   if dy1 ~= 0 then
+    -- loop from the top to either the bottom or the middle
     for i = y1, y2 do
+      -- determine the x of the line starting from the original, 
+      -- plus the step based on how many rows we've gone
       local ax = floor(x1 + (i - y1) * dax_step)
       local bx = floor(x1 + (i - y1) * dbx_step)
 
@@ -120,6 +129,8 @@ local function TriangleTextured(
       local tex_end_v   = v1 + (i - y1) * dv2_step
       local tex_end_w   = w1 + (i - y1) * dw2_step
 
+      -- sort along the x axis, 
+      -- to ensure a smaller x value is drawn before a larger x
       if ax > bx then
         ax, bx = bx, ax
         tex_start_u, tex_end_u = tex_end_u, tex_start_u
@@ -127,30 +138,45 @@ local function TriangleTextured(
         tex_start_w, tex_end_w = tex_end_w, tex_start_w
       end
 
+      -- the final points to sample from, they are the starting values at first
       tex_final_u = tex_start_u
       tex_final_v = tex_start_v
       tex_final_w = tex_start_w
       
+      -- 1 over the length of the current line
       local tstep = 1 / (bx - ax)
       local t = 0
 
+      -- loop through the current line
       for j = ax, bx - 1 do
+        -- to fix rounding errors
         if floor(t) == 1 then t = 1 end
 
+        -- interpolate the final points to sample from
         tex_final_u = (1 - t) * tex_start_u + t * tex_end_u
         tex_final_v = (1 - t) * tex_start_v + t * tex_end_v
         tex_final_w = (1 - t) * tex_start_w + t * tex_end_w
 
-        if tex_final_w > buffer[abs(i * SCREEN_WIDTH + j)] then -- TODO: check later if abs is needed
+        -- if the point is larger than the current pixel's z buffer value, draw it
+        -- TODO: check later if abs is needed
+        if tex_final_w > buffer[abs(i * SCREEN_WIDTH + j)] then
+          -- perspective correct texture mapping by dividing the u and v by the w
           local r, g, b, a = texture:getPixel(
             (tex_final_u / tex_final_w) * (textureWidth - 1),
             (tex_final_v / tex_final_w) * (textureHeight - 1)
           )
-          -- r, g, b = r * lightR, g * lightG, b * lightB
+
+          -- multiply the color by the lighting
+          r, g, b = r * lightR, g * lightG, b * lightB
+
+          -- draw the pixel
           love.graphics.points { {j, i, r, g, b, a} }
+
+          -- update the z buffer
           buffer[abs(i * SCREEN_WIDTH + j)] = tex_final_w
         end
-          
+        
+        -- increment t every time a new pixel is reached
         t = t + tstep
       end
     end
@@ -211,7 +237,7 @@ local function TriangleTextured(
             (tex_final_u / tex_final_w) * (textureWidth - 1),
             (tex_final_v / tex_final_w) * (textureHeight - 1)
           )
-          -- r, g, b = r * lightR, g * lightG, b * lightB
+          r, g, b = r * lightR, g * lightG, b * lightB
           love.graphics.points { {j, i, r, g, b, a} }
           buffer[abs(i * SCREEN_WIDTH + j)] = tex_final_w
         end
