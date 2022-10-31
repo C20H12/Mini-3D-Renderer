@@ -45,7 +45,7 @@ Mesh.LoadFromFile = function(self, fileName, hasTex)
           vts[i] = tonumber(vts[i])
         end
 
-        local vector = Vector2d:new(vts[2], vts[3])
+        local vector = Vector2d:new(vts[2], 1 - vts[3])
         insert(textures, vector)
       else
         local verts = {}
