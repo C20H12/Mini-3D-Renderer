@@ -16,7 +16,7 @@ function love.load()
   arrDepthBuffer = {}
 
   
-  object = Mesh:LoadFromFile('obj/bigtest.obj', true)
+  object = Mesh:LoadFromFile('obj/nc_bigtest.obj', true)
 
   
   -- object = Mesh:new(
@@ -58,7 +58,7 @@ function love.load()
   nYaw = 0
   
 
-  spriteTexture1 = love.image.newImageData("tex/High.png")
+  spriteTexture1 = love.image.newImageData("tex/nc_High.png")
   sprTex1Width, sprTex1Height = spriteTexture1:getDimensions()
   
 
@@ -174,7 +174,7 @@ function love.draw()
     if Vector3d.GetDotProduct(normal, vCameraRay) < 0 then
 
       -- lighting source
-      local vLightDirection = Vector3d:new(0, 1, -1):Normalize()
+      local vLightDirection = Vector3d:new(1, 1, 1):Normalize()
 
 
       -- how aligned are the light direction and the triangle normal?
@@ -290,7 +290,7 @@ function love.draw()
   -- end)
 
   -- clear bg
-  love.graphics.setBackgroundColor(0, 225 / 255, 1)
+  love.graphics.setBackgroundColor(0, 0, 0)
 
   -- clear depth buffer
   for i = 0, SCREEN_WIDTH * SCREEN_HEIGHT do
